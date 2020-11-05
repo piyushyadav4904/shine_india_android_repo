@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/devicescan_bottom_sheet"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:clickable="true"
+    android:orientation="vertical"
+    app:behavior_hideable="true"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+
+    <TextView
+        android:id="@+id/textView15"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Select Scan"
+        android:textColor="@color/colorAccent"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_malware_scan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:clickable="true"
+        android:drawableTop="@mipmap/malware"
+        android:drawablePadding="@dimen/margin_10"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:text="Malware Scan"
+        android:textColor="@color/Black"
+        app:layout_constraintEnd_toStartOf="@+id/tv_folder_scan"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView15" />
+
+    <TextView
+        android:id="@+id/tv_folder_scan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:drawableTop="@mipmap/folder"
+        android:drawablePadding="@dimen/margin_10"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:text="Folder Scan"
+        android:textColor="@color/Black"
+        app:layout_constraintBottom_toTopOf="@+id/textView80"
+        app:layout_constraintEnd_toStartOf="@+id/tv_full_scan"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/tv_malware_scan"
+        app:layout_constraintTop_toTopOf="@+id/tv_malware_scan" />
+
+    <TextView
+        android:id="@+id/tv_full_scan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:drawableTop="@mipmap/full"
+        android:drawablePadding="@dimen/margin_10"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:text="Full Scan"
+        android:textColor="@color/Black"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_folder_scan"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/tv_folder_scan"
+        app:layout_constraintTop_toTopOf="@+id/tv_folder_scan" />
+
+    <TextView
+        android:id="@+id/textView80"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="50dp"
+        android:text="Scan extra files"
+        android:textAlignment="center"
+        android:textSize="10sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/tv_malware_scan"
+        app:layout_constraintStart_toStartOf="@+id/tv_malware_scan"
+        app:layout_constraintTop_toBottomOf="@+id/tv_malware_scan" />
+
+    <TextView
+        android:id="@+id/textView81"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Scan selected folder"
+        android:textAlignment="center"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="@+id/tv_folder_scan"
+        app:layout_constraintStart_toStartOf="@+id/tv_folder_scan"
+        app:layout_constraintTop_toBottomOf="@+id/tv_folder_scan" />
+
+    <TextView
+        android:id="@+id/textView82"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Scan entire device"
+        android:textAlignment="center"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="@+id/tv_full_scan"
+        app:layout_constraintStart_toStartOf="@+id/tv_full_scan"
+        app:layout_constraintTop_toBottomOf="@+id/tv_full_scan" />
+</androidx.constraintlayout.widget.ConstraintLayout>

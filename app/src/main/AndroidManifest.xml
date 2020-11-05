@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.app.theshineindia">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
+    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.GET_TASKS" />
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <application
+        android:name=".app_locker.LockApplication"
+        android:allowBackup="true"
+        android:icon="@drawable/launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@drawable/launcher"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        android:requestLegacyExternalStorage="true"
+        android:usesCleartextTraffic="true"
+        tools:ignore="GoogleAppIndexingWarning">
+
+        <activity android:name=".location.LocationTestActivity"></activity>
+        <activity android:name=".location.GeoLocationActivity" />
+        <activity android:name=".location.LocationActivity" />
+        <activity
+            android:name=".phone_info.PhoneInfoActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+        <activity
+            android:name=".sim_tracker.SimTrackerActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/BlueAccent"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+        <activity
+            android:name=".sos.SOSActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/BlueAccent"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+        <activity
+            android:name=".app_locker.AppLockerActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/BlueAccent"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+        <activity
+            android:name=".theft_detection.TheftDetectionActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/BlueAccent"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+
+        <receiver
+            android:name=".services.SchedulerEventReceiver"
+            android:process=":hascode_process" />
+        <receiver
+            android:name=".services.SchedulerSetupReceiver"
+            android:process=":hascode_process">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+            </intent-filter>
+        </receiver>
+
+        <activity
+            android:name=".intruder_selfie.IntruderSelfieActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/BlueAccent"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+
+        <receiver
+            android:name=".intruder_selfie.AdminReceiver"
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/device_admin" />
+
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+                <action android:name="android.app.action.ACTION_PASSWORD_CHANGED" />
+                <action android:name="android.app.action.ACTION_PASSWORD_FAILED" />
+                <action android:name="android.app.action.ACTION_PASSWORD_SUCCEEDED" />
+            </intent-filter>
+        </receiver>
+
+        <activity
+            android:name=".payment.PaymentActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+        <activity
+            android:name=".Plan.SelectPlanActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+        <activity android:name=".splash.SplashActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".login.LoginActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+        <activity
+            android:name=".home.HomeActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+        <activity
+            android:name=".forgot_password.ForgotActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+        <activity
+            android:name=".registration.RegistrationActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+        <activity
+            android:name=".profile.ProfileActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppThemeWhite"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+        <activity
+            android:name=".changepassword.ChangePasswordActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+        <activity
+            android:name=".notification.NotificationActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+
+        <activity
+            android:name=".secret_code.SecretCodeActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+
+        <service
+            android:name=".services.SingleService"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="initialiseSingleService" />
+            </intent-filter>
+        </service> <!-- <receiver -->
+        <!-- android:name=".services.ChargingBR" -->
+        <!-- android:exported="false" -->
+        <!-- android:enabled="true"> -->
+        <!-- <intent-filter> -->
+        <!-- <action android:name="android.intent.action.ACTION_BATTERY_CHANGED" /> -->
+        <!-- </intent-filter> -->
+        <!-- </receiver> -->
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
+
+        <receiver
+            android:name=".app_locker.receiver.LockRestarterBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:label="RestartServiceWhenStopped" />
+
+        <activity
+            android:name=".app_locker.activities.pwd.CreatePwdActivity"
+            android:label="Create Password"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".app_locker.activities.lock.GestureSelfUnlockActivity"
+            android:label="Unlock"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".app_locker.activities.lock.GestureUnlockActivity"
+            android:excludeFromRecents="true"
+            android:label=""
+            android:launchMode="singleTask"
+            android:noHistory="true"
+            android:screenOrientation="portrait"
+            android:theme="@style/unlock_activity_style" />
+        <activity
+            android:name=".app_locker.activities.setting.LockSettingActivity"
+            android:label="Settings"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".app_locker.activities.lock.GestureCreateActivity"
+            android:label="Create a pattern lock"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".app_locker.activities.about.AboutMeActivity"
+            android:label="About me"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".app_locker.activities.main.MainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".app_locker.activities.main.SplashActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".device_scan.AppListActivity"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".app_hide.AppHideActivity" />
+
+        <service android:name=".app_locker.services.LoadAppListService" />
+        <service android:name=".app_locker.services.LockService" />
+        <service
+            android:name=".intruder_selfie.CameraService"
+            android:exported="false" />
+
+        <receiver android:name=".app_locker.receiver.BootBroadcastReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".secret_code.KioskService"
+            android:exported="false" />
+    </application>
+
+</manifest>

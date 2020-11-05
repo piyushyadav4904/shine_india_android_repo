@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorWhite"
+    android:orientation="vertical"
+    tools:context=".profile.ProfileActivity">
+
+    <include
+        layout="@layout/common_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/profile_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:visibility="visible">
+
+
+        <ImageView
+            android:id="@+id/ib_tracker_back"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:padding="15dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@mipmap/backarrow" />
+
+        <TextView
+            android:id="@+id/textView7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="My Account"
+            android:textColor="@color/Black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.35"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_edit"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginEnd="8dp"
+            android:drawableRight="@mipmap/account"
+            android:drawablePadding="@dimen/dimen_5"
+            android:gravity="center"
+            android:onClick="onEditModeClicked"
+            android:text="EDIT"
+            android:textColor="@color/Black"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <LinearLayout
+            android:id="@+id/linear_details"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/profile_toolbar">
+
+            <include layout="@layout/profile_username_layout" />
+
+            <include layout="@layout/profile_mobilenumber_layout" />
+
+            <include layout="@layout/profile_whatsapp_layout" />
+
+            <include layout="@layout/profile_email_layout" />
+
+
+            <include layout="@layout/profile_subscription_layout" />
+
+            <Button
+                android:id="@+id/btn_update"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/margin_30"
+                android:layout_marginRight="@dimen/margin_30"
+                android:layout_marginBottom="@dimen/margin_10"
+                android:background="@drawable/round_sky"
+                android:elevation="8dp"
+                android:onClick="updateProfile"
+                android:text="Update profile"
+                android:textColor="@color/White"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <Button
+                android:id="@+id/profile_btn_changepassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/margin_30"
+                android:layout_marginRight="@dimen/margin_30"
+                android:layout_marginBottom="@dimen/margin_10"
+                android:background="@drawable/round_sky"
+                android:onClick="changePassword"
+                android:paddingLeft="32dp"
+                android:paddingRight="32dp"
+                android:text="Change Password"
+                android:textColor="@color/white"
+                app:layout_constraintStart_toStartOf="@+id/constraintLayout"
+                app:layout_constraintTop_toBottomOf="@+id/constraintLayout" />
+        </LinearLayout>
+
+        <!--below is the previous layout code-->
+        <!-- previous layout -->
+
+    </ScrollView>
+
+</LinearLayout>
