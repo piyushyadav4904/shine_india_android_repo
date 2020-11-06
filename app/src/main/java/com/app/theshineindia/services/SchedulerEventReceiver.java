@@ -21,9 +21,9 @@ public class SchedulerEventReceiver extends BroadcastReceiver {
         if (SharedMethods.isSingleDetectionEnabled(context)) {
             SharedMethods.startMyService(context, SingleService.class);
 
-            if (SP.getBooleanPreference(context, SP.is_intruder_selfie_on)) {
+            /*if (SP.getBooleanPreference(context, SP.is_intruder_selfie_on)) {
                 SharedMethods.initIntruderSelfie(context);
-            }
+            }*/
 
         } else {
             SharedMethods.stopAlarmManager(context);
