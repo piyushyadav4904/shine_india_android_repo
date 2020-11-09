@@ -103,7 +103,7 @@ public class SingleService extends Service implements SensorEventListener {
         if (!is_register) {
             sensorManager.unregisterListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER));
         }
-        Log.d("1111", "SHAKE detection Started ----->");
+        //Log.d("1111", "SHAKE detection Started ----->");
     }
 
     private void startProximity(SensorManager sensorManager) {
@@ -111,7 +111,7 @@ public class SingleService extends Service implements SensorEventListener {
         if (!is_register) {
             sensorManager.unregisterListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY));
         }
-        Log.d("1111", "PROXIMITY detection Started ----->");
+        //Log.d("1111", "PROXIMITY detection Started ----->");
     }
 
     private void startChargeDetection() {
@@ -123,14 +123,14 @@ public class SingleService extends Service implements SensorEventListener {
         filter.addAction(Intent.ACTION_HEADSET_PLUG);
 
         registerReceiver(singleReceiver, filter);
-        Log.d("1111", "Charger detection Started ----->");
-        Log.d("1111", "headset detection Started ----->");
+        //Log.d("1111", "Charger detection Started ----->");
+        //Log.d("1111", "headset detection Started ----->");
     }
 
     private void startSimCardDetection() {
         //checkIsSimCardRemoved();
         telMgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        Log.d("1111", "SimCard detection Started ----->");
+        //Log.d("1111", "SimCard detection Started ----->");
     }
 
 
