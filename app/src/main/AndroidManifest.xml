@@ -28,6 +28,8 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
 
+    <uses-feature android:name="android.hardware.camera2.full" />
+
     <application
         android:name=".app_locker.LockApplication"
         android:allowBackup="true"
@@ -229,6 +231,7 @@
         <service
             android:name=".intruder_selfie.CameraService"
             android:exported="false" />
+        <service android:name=".intruder_selfie.InvisibleCameraService"/>
 
         <receiver android:name=".app_locker.receiver.BootBroadcastReceiver">
             <intent-filter>

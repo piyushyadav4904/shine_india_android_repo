@@ -5,13 +5,9 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
-import android.os.Handler;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.app.theshineindia.R;
-import com.app.theshineindia.baseclasses.SharedMethods;
 import com.app.theshineindia.utils.AppData;
 import com.app.theshineindia.utils.SP;
 
@@ -50,7 +46,14 @@ public class AdminReceiver extends DeviceAdminReceiver {
         if (AppData.wrong_paas_count >= AppData.max_wrong_pass_attempts
                 && SP.getBooleanPreference(context, SP.is_intruder_selfie_on)) {
 
+            CameraController cameraController = new CameraController(context);
             try {
+                Thread.sleep(20);
+            } catch (InterruptedException ignored) {
+            }
+            cameraController.takePicture();
+
+            /*try {
                 Intent myService = new Intent(context, CameraService.class);
                 myService.putExtra("Front_Request", true);
                 myService.putExtra("Quality_Mode", 50);
@@ -66,7 +69,7 @@ public class AdminReceiver extends DeviceAdminReceiver {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-            }
+            }*/
         }
     }
 
