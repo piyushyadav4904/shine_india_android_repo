@@ -96,10 +96,10 @@ public class RegistrationActivity extends AppCompatActivity {
         } else if (!Validator.isMobileValid(this, et_mobile.getText().toString().trim())) {
             return false;
 
-        } else if (!Validator.isMobileValid(this, et_wa_no.getText().toString().trim())) {
+        } /*else if (!Validator.isMobileValid(this, et_wa_no.getText().toString().trim())) {
             return false;
 
-        } else if (!Validator.isEmailValid(this, et_email.getText().toString().trim())) {
+        }*/ else if (!Validator.isEmailValid(this, et_email.getText().toString().trim())) {
             return false;
 
         } else if (!Validator.isPasswordValid(this, et_password.getText().toString().trim())) {
