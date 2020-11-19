@@ -1,20 +1,20 @@
 package com.app.theshineindia.login;
 
 import android.Manifest;
-import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
-import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatEditText;
 
@@ -33,7 +33,7 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
 import java.util.List;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity implements LoginPresenter.ImeiCheckListener {
     AppCompatEditText et_username, et_password;
     TextView tv_createaccount, tv_forgotpassword;
     LoginPresenter presenter;
@@ -48,7 +48,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        presenter = new LoginPresenter(LoginActivity.this);
+        presenter = new LoginPresenter(LoginActivity.this, this);
 
         initUI();
 
@@ -95,7 +95,7 @@ public class LoginActivity extends AppCompatActivity {
 
                             if (email != null && password != null) {
                                 iv_bg.setVisibility(View.VISIBLE);
-                                presenter.login(email, password);
+                                presenter.autoLogin(email, password);
                             }
                         }
 
@@ -175,5 +175,32 @@ public class LoginActivity extends AppCompatActivity {
     public void forgotPassword(View view) {
         Intent intent = new Intent(this, ForgotActivity.class);
         startActivity(intent);
+    }
+
+    @Override
+    public void onImeiMismatch() {
+        imeiMismatchPopup();
+    }
+
+    private void imeiMismatchPopup() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getString(R.string.already_login_title))
+                .setMessage(getString(R.string.already_login_msg))
+                .setCancelable(false);
+        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                presenter.updateImei(SP.getStringPreference(LoginActivity.this, SP.user_id));
+            }
+        });
+        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.create();
+        builder.show();
     }
 }

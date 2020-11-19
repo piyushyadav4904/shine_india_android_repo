@@ -2,7 +2,8 @@ package com.app.theshineindia.baseclasses;
 
 public class WebServices {
     // Dev server
-    public static String BASE_URL = "https://shine.kazma.co.in/Webservice/";
+    //public static String BASE_URL = "https://shine.kazma.co.in/Webservice/";
+    public static String BASE_URL = "http://3.134.55.52/Webservice/";
 
     public static final String result = "result";
     public static final String data = "data";
@@ -22,6 +23,8 @@ public class WebServices {
     public static final String delete_sos = "delete_sos";
     public static final String update_profile = "update_profile";
     public static final String send_sos_sms = "send_sos_sms";
+    public static final String imeiUpdate = "imei_update";
+    public static final String logout = "logout";
 
     // URL NO
     public static final int request_url_no_1 = 1;

@@ -36,6 +36,10 @@
     <string name="welcome_text">Welcome Alevant</string>
     <string name="logout">Logout</string>
     <string name="logout_text">Are you sure You want to Logout?</string>
+    <string name="already_login_title">Login Alert</string>
+    <string name="already_login_msg">You have already logged in from another device. Would you like to logout from other device and login to this new device?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 
     <!--Broadcast message-->
     <string name="headset_unplugged">Headset is unplugged</string>

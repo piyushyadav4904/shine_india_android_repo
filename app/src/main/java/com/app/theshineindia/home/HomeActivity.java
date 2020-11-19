@@ -4,56 +4,42 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
-
-import com.app.theshineindia.baseclasses.SharedMethods;
-import com.app.theshineindia.device_scan.AppListActivity;
-import com.app.theshineindia.app_locker.activities.main.SplashActivity;
-import com.app.theshineindia.sos.SOSActivity;
-import com.app.theshineindia.utils.Animator;
-import com.app.theshineindia.utils.AppData;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.navigation.NavigationView;
-
-import androidx.core.app.ActivityCompat;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatTextView;
-
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatTextView;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
 import com.app.theshineindia.R;
+import com.app.theshineindia.app_locker.activities.main.SplashActivity;
+import com.app.theshineindia.baseclasses.SharedMethods;
+import com.app.theshineindia.device_scan.AppListActivity;
 import com.app.theshineindia.intruder_selfie.IntruderSelfieActivity;
-import com.app.theshineindia.login.LoginActivity;
 import com.app.theshineindia.phone_info.PhoneInfoActivity;
 import com.app.theshineindia.profile.ProfileActivity;
 import com.app.theshineindia.sim_tracker.SimTrackerActivity;
+import com.app.theshineindia.sos.SOSActivity;
 import com.app.theshineindia.theft_detection.TheftDetectionActivity;
-import com.app.theshineindia.utils.Alert;
+import com.app.theshineindia.utils.Animator;
 import com.app.theshineindia.utils.IntentController;
 import com.app.theshineindia.utils.SP;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Locale;
-
-import locationprovider.davidserrano.com.LocationProvider;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.navigation.NavigationView;
 
 public class HomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
     private DrawerLayout drawer;
     private ImageView hamburger_menu;
     private NavigationView mNavigationView;
+    private HomePresenter presenter;
 
     ConstraintLayout layoutBottomSheet;
     TextView btn_devicescan;
@@ -65,6 +51,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        presenter = new HomePresenter(HomeActivity.this);
 
         initNavdrawer();
 
@@ -90,6 +78,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
         }
     }
+
     private boolean hasPermissions(HomeActivity homeMainActivity, String[] permissions) {
 
         if (homeMainActivity != null && permissions != null) {
@@ -101,7 +90,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         }
         return true;
     }
-
 
 
     @Override
@@ -185,19 +173,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         builder.setPositiveButton(getString(R.string.logout), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                try {
-                    if (SP.logoutFunction(HomeActivity.this)) {
-                        //stop all services
-
-                        Intent intent = new Intent(HomeActivity.this, LoginActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                        finish();
-                    }
-                } catch (Exception e) {
-                    Alert.showError(HomeActivity.this, e.getMessage());
-                }
-
+                dialog.dismiss();
+                presenter.logout(SP.getStringPreference(HomeActivity.this, SP.user_id));
             }
         });
         builder.setNegativeButton("Not now", new DialogInterface.OnClickListener() {
