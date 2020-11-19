@@ -43,8 +43,6 @@ public class HiddenCamera {
     private final OnImageCapturedListener onImageCapturedListener = new OnImageCapturedListener() {
         @Override
         public void onImageCaptured(@NotNull File file) {
-            Log.e("onImageCaptured", file.getAbsolutePath().toString());
-
             context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
 
             Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
