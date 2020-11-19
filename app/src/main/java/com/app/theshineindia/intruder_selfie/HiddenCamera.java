@@ -51,7 +51,7 @@ public class HiddenCamera {
             bitmap = SharedMethods.RotateBitmap(bitmap, -90);
 
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 70, bytes);
 
             String strImage = SharedMethods.convertToString(bitmap);
             if (strImage != null)
