@@ -286,6 +286,46 @@ public class SingleService extends Service implements SensorEventListener {
                 }
             }
         }
+
+        /*if (SP.getContactArrayListForSimTracker(getApplicationContext())!=null && SP.getContactArrayListForSimTracker(getApplicationContext()).size()>0){
+            String temp = "Sim card has been removed, be alert!!! ";
+            if (getPhone().size()>0){
+                if (getPhone().get(0)!=null && !TextUtils.isEmpty(getPhone().get(0).trim())){
+                    temp+=getPhone().get(0)+"\n";
+                }
+                if (getPhone().get(1)!=null && !TextUtils.isEmpty(getPhone().get(1).trim())){
+                    temp+=getPhone().get(1)+"\n";
+                }
+                if (getPhone().get(2)!=null && !TextUtils.isEmpty(getPhone().get(2).trim())){
+                    temp+=getPhone().get(2)+"\n";
+                }
+                if (getPhone().get(3)!=null && !TextUtils.isEmpty(getPhone().get(3).trim())){
+                    temp+= getPhone().get(3)+"\n";
+                }
+                if (getPhone().get(4)!=null && !TextUtils.isEmpty(getPhone().get(4).trim())){
+                    temp+= getPhone().get(4)+"\n";
+                }
+            }
+            if (SP.getStringPreference(getApplicationContext(), SP.mobile)!=null  &&
+                    !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.mobile).trim())){
+                temp+="Old Phone Number- " + SP.getStringPreference(getApplicationContext(), SP.mobile)+"\n";
+            }
+            if (SP.getStringPreference(getApplicationContext(), SP.name)!=null  &&
+                    !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.name).trim())){
+                temp+="User Name- " + SP.getStringPreference(getApplicationContext(), SP.name)+"\n";
+            }
+            if (SP.getStringPreference(getApplicationContext(), SP.email)!=null  &&
+                    !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.email).trim())){
+                temp+="Email- " + SP.getStringPreference(getApplicationContext(), SP.email)+"\n";
+            }
+
+            for (int i=0;i<SP.getContactArrayListForSimTracker(getApplicationContext()).size();i++){
+                Contact contact = SP.getContactArrayListForSimTracker(getApplicationContext()).get(i);
+                if (contact.getNum()!=null && !TextUtils.isEmpty(contact.getNum().trim())) {
+                    SendMessageUtils.SendMessage(contact.getNum(), temp);
+                }
+            }
+        }*/
     }
 
     @TargetApi(Build.VERSION_CODES.O)
