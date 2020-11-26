@@ -1,10 +1,16 @@
 package com.app.theshineindia.sos;
 
+import android.Manifest;
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -15,6 +21,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,6 +31,7 @@ import com.app.theshineindia.app_presenter.MessagePresenter;
 import com.app.theshineindia.utils.Alert;
 import com.app.theshineindia.utils.Animator;
 import com.app.theshineindia.utils.SP;
+import com.app.theshineindia.utils.SendMessageUtils;
 import com.app.theshineindia.utils.Validator;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
@@ -62,6 +70,91 @@ public class SOSActivity extends AppCompatActivity implements SosClickListener {
         bottomSheetListener();
 
         getCurrentLocation();
+
+
+        if (SP.getContactArrayListForSimTracker(getApplicationContext())!=null && SP.getContactArrayListForSimTracker(getApplicationContext()).size()>0){
+            String temp = "Sim card has been removed, be alert!!! \n";
+            /*if (getPhone().size()>0){
+                if (getPhone().get(0)!=null && !TextUtils.isEmpty(getPhone().get(0).trim())){
+                    temp+="IMEI " + getPhone().get(0)+"\n";
+                }
+                *//*if (getPhone().get(1)!=null && !TextUtils.isEmpty(getPhone().get(1).trim())){
+                    temp+="Mobile " + getPhone().get(1)+"\n";
+                }*//*
+                if (getPhone().get(2)!=null && !TextUtils.isEmpty(getPhone().get(2).trim())){
+                    temp+="Serial " + getPhone().get(2)+"\n";
+                }
+                if (getPhone().get(3)!=null && !TextUtils.isEmpty(getPhone().get(3).trim())){
+                    temp+="Operator " + getPhone().get(3)+"\n";
+                }
+                if (getPhone().get(4)!=null && !TextUtils.isEmpty(getPhone().get(4).trim())){
+                    temp+="COUNTRY " + getPhone().get(4)+"\n";
+                }
+            }*/
+            if (SP.getStringPreference(getApplicationContext(), SP.mobile)!=null  &&
+                    !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.mobile).trim())){
+                temp+="Old Phone Number- " + SP.getStringPreference(getApplicationContext(), SP.mobile)+"\n";
+            }
+            if (SP.getStringPreference(getApplicationContext(), SP.name)!=null  &&
+                    !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.name).trim())){
+                temp+="User Name- " + SP.getStringPreference(getApplicationContext(), SP.name)+"\n";
+            }
+            if (SP.getStringPreference(getApplicationContext(), SP.email)!=null  &&
+                    !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.email).trim())){
+                temp+="Email- " + SP.getStringPreference(getApplicationContext(), SP.email)+"\n";
+            }
+            ArrayList<String> _lst = getPhone();
+            if (_lst.size()>0 ){
+                for (int i=0;i<_lst.size();i++){
+                    temp+=_lst.get(i)+"\n";
+                }
+            }
+            for (int i=0;i<SP.getContactArrayListForSimTracker(getApplicationContext()).size();i++){
+                Contact contact = SP.getContactArrayListForSimTracker(getApplicationContext()).get(i);
+                if (contact.getNum()!=null && !TextUtils.isEmpty(contact.getNum().trim())) {
+                    SendMessageUtils.SendMessage(contact.getNum(), temp);
+                }
+            }
+        }
+
+
+
+        /*if (SP.getContactArrayListForSimTracker(getApplicationContext())!=null && SP.getContactArrayListForSimTracker(getApplicationContext()).size()>0){
+            String temp = "Sim card has been removed, be alert!!! ";
+            ArrayList<String> _lst = getPhone();
+            if (_lst.size()>0 ){
+                for (int i=0;i<_lst.size();i++){
+                    temp+=_lst.get(i)+"\n";
+                }
+            }
+            if (SP.getStringPreference(getApplicationContext(), SP.mobile)!=null  &&
+                    !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.mobile).trim())){
+                temp+="Old Phone Number- " + SP.getStringPreference(getApplicationContext(), SP.mobile)+"\n";
+            }
+            if (SP.getStringPreference(getApplicationContext(), SP.name)!=null  &&
+                    !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.name).trim())){
+                temp+="User Name- " + SP.getStringPreference(getApplicationContext(), SP.name)+"\n";
+            }
+            if (SP.getStringPreference(getApplicationContext(), SP.email)!=null  &&
+                    !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.email).trim())){
+                temp+="Email- " + SP.getStringPreference(getApplicationContext(), SP.email)+"\n";
+            }
+
+            for (int i=0;i<SP.getContactArrayListForSimTracker(getApplicationContext()).size();i++){
+                Contact contact = SP.getContactArrayListForSimTracker(getApplicationContext()).get(i);
+                if (contact.getNum()!=null && !TextUtils.isEmpty(contact.getNum().trim())) {
+                    String finalTemp = temp;
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            SendMessageUtils.SendMessage(contact.getNum(), finalTemp);
+                        }
+                    }, 1500);
+                }
+            }
+        }*/
+
+//        getPhone();
     }
 
     @Override
@@ -254,5 +347,25 @@ public class SOSActivity extends AppCompatActivity implements SosClickListener {
 
         builder.create();
         builder.show();
+    }
+
+    @TargetApi(Build.VERSION_CODES.O)
+    private ArrayList<String> getPhone() {
+        ArrayList<String> _lst =new ArrayList<>();
+        TelephonyManager phoneMgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+//            _lst.add(String.valueOf(phoneMgr.getCallState()));
+            _lst.add("IMEI No.-"+phoneMgr.getImei());
+//            _lst.add("Number :-"+phoneMgr.getLine1Number());
+            _lst.add("Serial No.-"+phoneMgr.getSimSerialNumber());
+//            _lst.add("Operator :-"+phoneMgr.getSimOperatorName());
+//            _lst.add("Subscriber id :-"+phoneMgr.getSubscriptionId());
+//            _lst.add("MEI NUMBER :-"+phoneMgr.getMeid());
+//            _lst.add("SIM STATE :-"+String.valueOf(phoneMgr.getSimState()));
+//            _lst.add("ISO :-"+phoneMgr.getSimCountryIso());
+        }
+        Log.d("Sim Tracker", "getPhone: "+_lst);
+
+        return _lst;
     }
 }

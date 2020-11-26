@@ -3,6 +3,8 @@ package com.app.theshineindia.app_locker;
 import android.content.Context;
 import android.os.PowerManager;
 
+import androidx.multidex.MultiDex;
+
 import com.app.theshineindia.app_locker.activities.lock.GestureUnlockActivity;
 import com.app.theshineindia.app_locker.base.BaseActivity;
 import com.app.theshineindia.app_locker.utils.SpUtil;
@@ -27,7 +29,7 @@ public class LockApplication extends LitePalApplication {
     public void onCreate() {
         super.onCreate();
         application = this;
-
+        MultiDex.install(this);
         //Crash reporter utility
         //CrashReporter.initialize(this, getCacheDir().getPath());
 

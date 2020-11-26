@@ -174,6 +174,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
+                SP.deleteContactListForSimTracker(HomeActivity.this);
                 presenter.logout(SP.getStringPreference(HomeActivity.this, SP.user_id));
             }
         });

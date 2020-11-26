@@ -1,5 +1,7 @@
 package com.app.theshineindia.services;
 
+import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -7,6 +9,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -17,18 +20,22 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 
 import com.app.theshineindia.app_presenter.MessagePresenter;
 import com.app.theshineindia.baseclasses.SharedMethods;
 import com.app.theshineindia.loaders.JSONFunctions;
+import com.app.theshineindia.sos.Contact;
 import com.app.theshineindia.sos.SOSActivity;
 import com.app.theshineindia.utils.Alert;
 import com.app.theshineindia.utils.AppData;
 import com.app.theshineindia.utils.SP;
+import com.app.theshineindia.utils.SendMessageUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -251,7 +258,74 @@ public class SingleService extends Service implements SensorEventListener {
     public void sendSOSMessage() {
         //call api to send sms
         new MessagePresenter(this, "sim_change").requestSendSosMessage("sim");
+
+        if (SP.getContactArrayListForSimTracker(getApplicationContext())!=null && SP.getContactArrayListForSimTracker(getApplicationContext()).size()>0){
+            String temp = "Sim card has been removed, be alert!!! \n";
+            if (SP.getStringPreference(getApplicationContext(), SP.mobile)!=null  &&
+                    !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.mobile).trim())){
+                temp+="Old Phone Number- " + SP.getStringPreference(getApplicationContext(), SP.mobile)+"\n";
+            }
+            if (SP.getStringPreference(getApplicationContext(), SP.name)!=null  &&
+                    !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.name).trim())){
+                temp+="User Name- " + SP.getStringPreference(getApplicationContext(), SP.name)+"\n";
+            }
+            if (SP.getStringPreference(getApplicationContext(), SP.email)!=null  &&
+                    !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.email).trim())){
+                temp+="Email- " + SP.getStringPreference(getApplicationContext(), SP.email)+"\n";
+            }
+            ArrayList<String> _lst = getPhone();
+            if (_lst.size()>0 ){
+                for (int i=0;i<_lst.size();i++){
+                    temp+=_lst.get(i)+"\n";
+                }
+            }
+            for (int i=0;i<SP.getContactArrayListForSimTracker(getApplicationContext()).size();i++){
+                Contact contact = SP.getContactArrayListForSimTracker(getApplicationContext()).get(i);
+                if (contact.getNum()!=null && !TextUtils.isEmpty(contact.getNum().trim())) {
+                    SendMessageUtils.SendMessage(contact.getNum(), temp);
+                }
+            }
+        }
     }
+
+    @TargetApi(Build.VERSION_CODES.O)
+    private ArrayList<String> getPhone() {
+        ArrayList<String> _lst =new ArrayList<>();
+        TelephonyManager phoneMgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+//            _lst.add(String.valueOf(phoneMgr.getCallState()));
+            _lst.add("IMEI No.-"+phoneMgr.getImei());
+//            _lst.add("Number :-"+phoneMgr.getLine1Number());
+            _lst.add("Serial No.-"+phoneMgr.getSimSerialNumber());
+//            _lst.add("Operator :-"+phoneMgr.getSimOperatorName());
+//            _lst.add("Subscriber id :-"+phoneMgr.getSubscriptionId());
+//            _lst.add("MEI NUMBER :-"+phoneMgr.getMeid());
+//            _lst.add("SIM STATE :-"+String.valueOf(phoneMgr.getSimState()));
+//            _lst.add("ISO :-"+phoneMgr.getSimCountryIso());
+        }
+        Log.d("Sim Tracker", "getPhone: "+_lst);
+
+        return _lst;
+    }
+
+    /*@TargetApi(Build.VERSION_CODES.O)
+    private ArrayList<String> getPhone() {
+        ArrayList<String> _lst =new ArrayList<>();
+        TelephonyManager phoneMgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+            _lst.add(String.valueOf(phoneMgr.getCallState()));
+            _lst.add("IMEI NUMBER :-"+phoneMgr.getImei());
+            _lst.add("MOBILE NUMBER :-"+phoneMgr.getLine1Number());
+            _lst.add("SERIAL NUMBER :-"+phoneMgr.getSimSerialNumber());
+            _lst.add("SIM OPERATOR NAME :-"+phoneMgr.getSimOperatorName());
+//            _lst.add("MEI NUMBER :-"+phoneMgr.getMeid());
+//            _lst.add("SIM STATE :-"+String.valueOf(phoneMgr.getSimState()));
+            _lst.add("COUNTRY ISO :-"+phoneMgr.getSimCountryIso());
+        }
+        Log.d("Sim Tracker", "getPhone: "+_lst);
+
+        return _lst;
+    }*/
 
     //============================ Geo Location ============================
     private void getCurrentLocation() {

@@ -1,7 +1,13 @@
 package com.app.theshineindia.app_presenter;
 
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.telephony.TelephonyManager;
 import android.widget.Toast;
+
+import androidx.core.app.ActivityCompat;
 
 import com.app.theshineindia.baseclasses.BasePresenter;
 import com.app.theshineindia.baseclasses.SharedMethods;
@@ -14,6 +20,7 @@ import com.app.theshineindia.utils.SP;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MessagePresenter extends BasePresenter {
@@ -62,4 +69,6 @@ public class MessagePresenter extends BasePresenter {
             e.printStackTrace();
         }
     }
+
+
 }

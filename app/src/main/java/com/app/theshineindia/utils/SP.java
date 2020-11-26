@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
+import com.app.theshineindia.sos.Contact;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -18,6 +19,7 @@ public class SP {
     private static SharedPreferences.Editor editor;
 
     //keys
+    public static final String contact_list_sim_tracker = "contact_list_sim_tracker";
     public static final String fcm_token = "fcm_token";
     public static final String login = "login";
     public static final String user_id = "user_id";
@@ -144,4 +146,33 @@ public class SP {
         }
     }
 
+
+
+
+
+    public static void saveContactArrayListForSimTracker(Context context, ArrayList<Contact> list) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = prefs.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(list);
+        editor.putString(contact_list_sim_tracker, json);
+        editor.apply();
+
+    }
+
+    public static ArrayList<Contact> getContactArrayListForSimTracker(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        Gson gson = new Gson();
+        String json = prefs.getString(contact_list_sim_tracker, null);
+        Type type = new TypeToken<ArrayList<Contact>>() {
+        }.getType();
+        return gson.fromJson(json, type);
+    }
+
+    public static void deleteContactListForSimTracker(Context context){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.remove(contact_list_sim_tracker);
+        editor.apply();
+    }
 }
