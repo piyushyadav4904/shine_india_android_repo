@@ -5,8 +5,8 @@ public class WebServices {
     //public static String BASE_URL = "https://shine.kazma.co.in/Webservice/";
 
 //    public static String BASE_URL = "http://www.backend.theshineindia.co.in/Webservice/";
-    public static String BASE_URL = "http://backend.theshineindia.co.in/Webservice/";
-//    public static String BASE_URL = "http://3.134.55.52/Webservice/";
+//    public static String BASE_URL = "http://backend.theshineindia.co.in/Webservice/";
+    public static String BASE_URL = "http://3.134.55.52/Webservice/";
 
     public static final String result = "result";
     public static final String data = "data";

@@ -34,6 +34,7 @@ import com.app.theshineindia.sos.Contact;
 import com.app.theshineindia.sos.SOSActivity;
 import com.app.theshineindia.utils.Alert;
 import com.app.theshineindia.utils.AppData;
+import com.app.theshineindia.utils.DualSimManager;
 import com.app.theshineindia.utils.SP;
 import com.app.theshineindia.utils.SendMessageUtils;
 
@@ -87,8 +88,8 @@ public class SingleService extends Service implements SensorEventListener {
 
             SharedMethods.startAlarmManager(this);
 
-            if (SP.getBooleanPreference(this, SP.is_sim_tracker_on) && countForMessageSendWhenSimTrackerOn<1 &&
-                    SP.getContactArrayListForSimTracker(this)!=null && SP.getContactArrayListForSimTracker(this).size()>0) {
+            if (SP.getBooleanPreference(this, SP.is_sim_tracker_on) && countForMessageSendWhenSimTrackerOn < 1 &&
+                    SP.getContactArrayListForSimTracker(this) != null && SP.getContactArrayListForSimTracker(this).size() > 0) {
                 countForMessageSendWhenSimTrackerOn++;
                 checkIsSimCardRemoved();
                 new Handler().postDelayed(new Runnable() {
@@ -213,8 +214,8 @@ public class SingleService extends Service implements SensorEventListener {
             }
 
             Log.d(TAG, "onSensorChanged: true");
-            if (SP.getBooleanPreference(this, SP.is_sim_tracker_on) && countForMessageSendWhenSimTrackerOn<1 &&
-                    SP.getContactArrayListForSimTracker(this)!=null && SP.getContactArrayListForSimTracker(this).size()>0) {
+            if (SP.getBooleanPreference(this, SP.is_sim_tracker_on) && countForMessageSendWhenSimTrackerOn < 1 &&
+                    SP.getContactArrayListForSimTracker(this) != null && SP.getContactArrayListForSimTracker(this).size() > 0) {
                 countForMessageSendWhenSimTrackerOn++;
                 checkIsSimCardRemoved();
                 new Handler().postDelayed(new Runnable() {
@@ -267,23 +268,52 @@ public class SingleService extends Service implements SensorEventListener {
 
         TelephonyManager phoneMgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
 
-        Log.d(TAG, "checkIsSimCardRemoved_prev_sim_count: "+prev_sim_count);
-        Log.d(TAG, "checkIsSimCardRemoved_current_sim_count: "+current_sim_count);
-        Log.d(TAG, "checkIsSimCardRemoved_serial_number_prev: "+SP.getStringPreference(this, SP.sim_serial_number));
-        Log.d(TAG, "checkIsSimCardRemoved_serial_number: "+phoneMgr.getSimSerialNumber());
-        if (phoneMgr!=null && phoneMgr.getSimSerialNumber()!=null){
-            if ((prev_sim_count > current_sim_count
-                    || prev_sim_count < current_sim_count
-                    || (SP.getStringPreference(this, SP.sim_serial_number) != null &&
-                    !SP.getStringPreference(this, SP.sim_serial_number).equals(phoneMgr.getSimSerialNumber())))) { //it work even if sim removed then inserted (count same)
+        Log.d(TAG, "checkIsSimCardRemoved_prev_sim_count: " + prev_sim_count);
+        Log.d(TAG, "checkIsSimCardRemoved_current_sim_count: " + current_sim_count);
+        Log.d(TAG, "checkIsSimCardRemoved_serial_number_prev: " + SP.getStringPreference(this, SP.sim_serial_number));
+        Log.d(TAG, "checkIsSimCardRemoved_serial_number_sim1: " + phoneMgr.getSimSerialNumber());
+        if (DualSimManager.getSimSerialNumbersICCID(this).containsKey(DualSimManager.KEY_FOR_SIM_2)){
+            Log.d(TAG, "checkIsSimCardRemoved_serial_number_sim2: " + DualSimManager.getSimSerialNumbersICCID(this).get(DualSimManager.KEY_FOR_SIM_2));
+        }
+            if (phoneMgr != null && phoneMgr.getSimSerialNumber() != null) { // getting ICCID of sime 1  equivalent to  DualSimManager.getSimSerialNumbersICCID(this).containsKey(DualSimManager.KEY_FOR_SIM_1)
+            if (SP.getStringPreference(this, SP.sim_serial_number) != null &&
+                    !SP.getStringPreference(this, SP.sim_serial_number).contains(phoneMgr.getSimSerialNumber())) { //it work even if sim removed then inserted (count same)
 
                 SP.setBooleanPreference(this, SP.is_sim_card_changed, true);
                 Log.d("1111", "Sim card removed ---->");
 
-                if (JSONFunctions.isInternetOn(this))
+                if (JSONFunctions.isInternetOn(this)) {
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                           sendSOSMessage( phoneMgr.getSimSerialNumber());
+                        }
+                    }, 20 * 1000);
+//                    new Handler().postDelayed(this::sendSOSMessage, 24 * 1000);
+                } else
+                    Log.d("1111", "No internet available: ");
+            }
+        } else if (DualSimManager.getSimSerialNumbersICCID(this).containsKey(DualSimManager.KEY_FOR_SIM_2)) {
+            if (SP.getStringPreference(this, SP.sim_serial_number) != null &&
+                    !SP.getStringPreference(this, SP.sim_serial_number).
+                            contains(DualSimManager.getSimSerialNumbersICCID(this).get(DualSimManager.KEY_FOR_SIM_2))) { //it work even if sim removed then inserted (count same)
+
+                SP.setBooleanPreference(this, SP.is_sim_card_changed, true);
+                Log.d("1111", "Sim card removed ---->");
+                if (JSONFunctions.isInternetOn(this)) {
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            sendSOSMessage(DualSimManager.getSimSerialNumbersICCID(getApplicationContext()).get(DualSimManager.KEY_FOR_SIM_2));
+                        }
+                    }, 20 * 1000);
+//                    new Handler().postDelayed(this::sendSOSMessage, 24 * 1000);
+                } else
+                    Log.d("1111", "No internet available: ");
+                /*if (JSONFunctions.isInternetOn(this))
                     new Handler().postDelayed(this::sendSOSMessage, 24 * 1000);
                 else
-                    Log.d("1111", "No internet available: ");
+                Log.d("1111", "No internet available: ");*/
             }
         }
 
@@ -312,7 +342,7 @@ public class SingleService extends Service implements SensorEventListener {
         }*/
     }
 
-    public void sendSOSMessage() {
+    public void sendSOSMessage(String simSerialNumberToSend) {
         //call api to send sms
         new MessagePresenter(this, "sim_change").requestSendSosMessage("sim");
 
@@ -335,7 +365,7 @@ public class SingleService extends Service implements SensorEventListener {
                     !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.email).trim())) {
                 temp += "Email- " + SP.getStringPreference(getApplicationContext(), SP.email) + "\n";
             }
-            ArrayList<String> _lst = getPhone();
+            ArrayList<String> _lst = getPhone(simSerialNumberToSend);
             if (_lst.size() > 0) {
                 for (int i = 0; i < _lst.size(); i++) {
                     temp += _lst.get(i) + "\n";
@@ -391,14 +421,15 @@ public class SingleService extends Service implements SensorEventListener {
     }
 
     @TargetApi(Build.VERSION_CODES.O)
-    private ArrayList<String> getPhone() {
+    private ArrayList<String> getPhone(String simSerialNumberToSend) {
         ArrayList<String> _lst = new ArrayList<>();
         TelephonyManager phoneMgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
 //            _lst.add(String.valueOf(phoneMgr.getCallState()));
             _lst.add("IMEI No.-" + phoneMgr.getImei());
 //            _lst.add("Number :-"+phoneMgr.getLine1Number());
-            _lst.add("Serial No.-" + phoneMgr.getSimSerialNumber());
+//            _lst.add("Serial No.-" + phoneMgr.getSimSerialNumber());
+            _lst.add("Serial No.-" + simSerialNumberToSend);
 //            _lst.add("Operator :-"+phoneMgr.getSimOperatorName());
 //            _lst.add("Subscriber id :-"+phoneMgr.getSubscriptionId());
 //            _lst.add("MEI NUMBER :-"+phoneMgr.getMeid());

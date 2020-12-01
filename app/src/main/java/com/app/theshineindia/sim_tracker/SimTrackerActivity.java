@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,6 +26,7 @@ import com.app.theshineindia.location.LocationTestActivity;
 import com.app.theshineindia.sos.Contact;
 import com.app.theshineindia.sos.SOSActivity;
 import com.app.theshineindia.sos.SOSAdapter;
+import com.app.theshineindia.utils.DualSimManager;
 import com.app.theshineindia.utils.IntentController;
 import com.app.theshineindia.utils.SP;
 import com.app.theshineindia.utils.Validator;
@@ -33,6 +35,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import java.util.ArrayList;
 
 public class SimTrackerActivity extends AppCompatActivity {
+    private static final String TAG = "SimTrackerActivity";
     Switch switch_sim_tracker;
     ConstraintLayout layoutBottomSheet;
     BottomSheetBehavior sheetBehavior;
@@ -98,8 +101,23 @@ public class SimTrackerActivity extends AppCompatActivity {
                 emergencynum_recyclerview.setVisibility(View.VISIBLE);
                 TelephonyManager phoneMgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
                 if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
-                   String sim_serial_number = phoneMgr.getSimSerialNumber();
-                    SP.setStringPreference(this, SP.sim_serial_number, sim_serial_number);
+                    String sim_1_serial_number = null;
+                    String sim_2_serial_number = null;
+                    if (phoneMgr != null && phoneMgr.getSimSerialNumber() != null) {
+                        sim_1_serial_number = phoneMgr.getSimSerialNumber();
+                    }
+                    if (DualSimManager.getSimSerialNumbersICCID(this).containsKey(DualSimManager.KEY_FOR_SIM_2)) {
+                        sim_2_serial_number = DualSimManager.getSimSerialNumbersICCID(this).get(DualSimManager.KEY_FOR_SIM_2);
+                    }
+                    String temp = "";
+                    if (sim_1_serial_number!=null){
+                        temp = temp + sim_1_serial_number + ",";
+                    }
+                    if (sim_2_serial_number!=null){
+                        temp = temp + sim_2_serial_number;
+                    }
+                    Log.d(TAG, "sim_serial_numbers: "+temp);
+                    SP.setStringPreference(this, SP.sim_serial_number, temp);
                 }
             } else {
                 SP.setBooleanPreference(this, SP.is_sim_tracker_on, false);
