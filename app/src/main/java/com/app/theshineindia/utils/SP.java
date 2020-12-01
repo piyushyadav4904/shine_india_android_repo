@@ -22,6 +22,7 @@ public class SP {
     public static final String contact_list_sim_tracker = "contact_list_sim_tracker";
     public static final String fcm_token = "fcm_token";
     public static final String login = "login";
+    public static final String sim_serial_number = "sim_serial_number";
     public static final String user_id = "user_id";
     public static final String name = "name";
     public static final String email = "email";

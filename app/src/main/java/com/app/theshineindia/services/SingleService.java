@@ -45,6 +45,9 @@ import java.util.Locale;
 import locationprovider.davidserrano.com.LocationProvider;
 
 public class SingleService extends Service implements SensorEventListener {
+    private static final String TAG = "SingleService";
+
+    private int countForMessageSendWhenSimTrackerOn = 0;
     SensorManager sensorManager;
     private long lastUpdate = -1;
     private float last_x, last_y, last_z;
@@ -61,6 +64,7 @@ public class SingleService extends Service implements SensorEventListener {
     public void onCreate() {
         super.onCreate();
         Log.d("1111", "======================= SingleService started =====================");
+
         try {
             buildNotification();
 
@@ -82,6 +86,18 @@ public class SingleService extends Service implements SensorEventListener {
             startSimCardDetection();
 
             SharedMethods.startAlarmManager(this);
+
+            if (SP.getBooleanPreference(this, SP.is_sim_tracker_on) && countForMessageSendWhenSimTrackerOn<1 &&
+                    SP.getContactArrayListForSimTracker(this)!=null && SP.getContactArrayListForSimTracker(this).size()>0) {
+                countForMessageSendWhenSimTrackerOn++;
+                checkIsSimCardRemoved();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        countForMessageSendWhenSimTrackerOn = 0;
+                    }
+                }, 50000);
+            }
 
         } catch (Exception e) {
             Toast.makeText(this, "SingleService: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -168,6 +184,7 @@ public class SingleService extends Service implements SensorEventListener {
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 
+
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
 
@@ -188,14 +205,24 @@ public class SingleService extends Service implements SensorEventListener {
             }
         }
 
+
         //================================TYPE_ACCELEROMETER========================================
         if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             if (SP.getBooleanPreference(this, SP.Sensor_Type.is_shake_detection_on)) {
                 checkPhoneShake(sensorEvent);
             }
 
-            if (SP.getBooleanPreference(this, SP.is_sim_tracker_on)) {
+            Log.d(TAG, "onSensorChanged: true");
+            if (SP.getBooleanPreference(this, SP.is_sim_tracker_on) && countForMessageSendWhenSimTrackerOn<1 &&
+                    SP.getContactArrayListForSimTracker(this)!=null && SP.getContactArrayListForSimTracker(this).size()>0) {
+                countForMessageSendWhenSimTrackerOn++;
                 checkIsSimCardRemoved();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        countForMessageSendWhenSimTrackerOn = 0;
+                    }
+                }, 50000);
             }
         }
     }
@@ -233,15 +260,45 @@ public class SingleService extends Service implements SensorEventListener {
     }
 
     private void checkIsSimCardRemoved() {
-        current_time = System.currentTimeMillis();
+        if (SP.getStringPreference(this, SP.prev_sim_count) == null) return;
+        int prev_sim_count = Integer.parseInt(SP.getStringPreference(this, SP.prev_sim_count));
+        int current_sim_count = SharedMethods.getAvailableSimCount(this);
+
+
+        TelephonyManager phoneMgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+
+        Log.d(TAG, "checkIsSimCardRemoved_prev_sim_count: "+prev_sim_count);
+        Log.d(TAG, "checkIsSimCardRemoved_current_sim_count: "+current_sim_count);
+        Log.d(TAG, "checkIsSimCardRemoved_serial_number_prev: "+SP.getStringPreference(this, SP.sim_serial_number));
+        Log.d(TAG, "checkIsSimCardRemoved_serial_number: "+phoneMgr.getSimSerialNumber());
+        if (phoneMgr!=null && phoneMgr.getSimSerialNumber()!=null){
+            if ((prev_sim_count > current_sim_count
+                    || prev_sim_count < current_sim_count
+                    || (SP.getStringPreference(this, SP.sim_serial_number) != null &&
+                    !SP.getStringPreference(this, SP.sim_serial_number).equals(phoneMgr.getSimSerialNumber())))) { //it work even if sim removed then inserted (count same)
+
+                SP.setBooleanPreference(this, SP.is_sim_card_changed, true);
+                Log.d("1111", "Sim card removed ---->");
+
+                if (JSONFunctions.isInternetOn(this))
+                    new Handler().postDelayed(this::sendSOSMessage, 24 * 1000);
+                else
+                    Log.d("1111", "No internet available: ");
+            }
+        }
+
+        /*current_time = System.currentTimeMillis();
         if (current_time - prev_time >= 25 * 1000) {
             if (SP.getStringPreference(this, SP.prev_sim_count) == null) return;
             int prev_sim_count = Integer.parseInt(SP.getStringPreference(this, SP.prev_sim_count));
             int current_sim_count = SharedMethods.getAvailableSimCount(this);
 
+            TelephonyManager phoneMgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
             if (prev_sim_count > current_sim_count
                     || prev_sim_count < current_sim_count
-                    || SP.getBooleanPreference(this, SP.is_sim_card_changed)) { //it work even if sim removed then inserted (count same)
+                    || SP.getBooleanPreference(this, SP.is_sim_card_changed)
+                    || (SP.getStringPreference(this, SP.sim_serial_number) != null &&
+                    SP.getStringPreference(this, SP.sim_serial_number).equals(phoneMgr.getSimSerialNumber()))) { //it work even if sim removed then inserted (count same)
 
                 SP.setBooleanPreference(this, SP.is_sim_card_changed, true);
                 Log.d("1111", "Sim card removed ---->");
@@ -252,36 +309,41 @@ public class SingleService extends Service implements SensorEventListener {
                     Log.d("1111", "No internet available: ");
             }
             prev_time = current_time;
-        }
+        }*/
     }
 
     public void sendSOSMessage() {
         //call api to send sms
         new MessagePresenter(this, "sim_change").requestSendSosMessage("sim");
 
-        if (SP.getContactArrayListForSimTracker(getApplicationContext())!=null && SP.getContactArrayListForSimTracker(getApplicationContext()).size()>0){
+//        TelephonyManager phoneMgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+//        if (SP.getStringPreference(this, SP.sim_serial_number) != null &&
+//                !SP.getStringPreference(this, SP.sim_serial_number).equals(phoneMgr.getSimSerialNumber())) {
+//
+//        }
+        if (SP.getContactArrayListForSimTracker(getApplicationContext()) != null && SP.getContactArrayListForSimTracker(getApplicationContext()).size() > 0) {
             String temp = "Sim card has been removed, be alert!!! \n";
-            if (SP.getStringPreference(getApplicationContext(), SP.mobile)!=null  &&
-                    !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.mobile).trim())){
-                temp+="Old Phone Number- " + SP.getStringPreference(getApplicationContext(), SP.mobile)+"\n";
+            if (SP.getStringPreference(getApplicationContext(), SP.mobile) != null &&
+                    !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.mobile).trim())) {
+                temp += "Old Phone Number- " + SP.getStringPreference(getApplicationContext(), SP.mobile) + "\n";
             }
-            if (SP.getStringPreference(getApplicationContext(), SP.name)!=null  &&
-                    !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.name).trim())){
-                temp+="User Name- " + SP.getStringPreference(getApplicationContext(), SP.name)+"\n";
+            if (SP.getStringPreference(getApplicationContext(), SP.name) != null &&
+                    !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.name).trim())) {
+                temp += "User Name- " + SP.getStringPreference(getApplicationContext(), SP.name) + "\n";
             }
-            if (SP.getStringPreference(getApplicationContext(), SP.email)!=null  &&
-                    !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.email).trim())){
-                temp+="Email- " + SP.getStringPreference(getApplicationContext(), SP.email)+"\n";
+            if (SP.getStringPreference(getApplicationContext(), SP.email) != null &&
+                    !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.email).trim())) {
+                temp += "Email- " + SP.getStringPreference(getApplicationContext(), SP.email) + "\n";
             }
             ArrayList<String> _lst = getPhone();
-            if (_lst.size()>0 ){
-                for (int i=0;i<_lst.size();i++){
-                    temp+=_lst.get(i)+"\n";
+            if (_lst.size() > 0) {
+                for (int i = 0; i < _lst.size(); i++) {
+                    temp += _lst.get(i) + "\n";
                 }
             }
-            for (int i=0;i<SP.getContactArrayListForSimTracker(getApplicationContext()).size();i++){
+            for (int i = 0; i < SP.getContactArrayListForSimTracker(getApplicationContext()).size(); i++) {
                 Contact contact = SP.getContactArrayListForSimTracker(getApplicationContext()).get(i);
-                if (contact.getNum()!=null && !TextUtils.isEmpty(contact.getNum().trim())) {
+                if (contact.getNum() != null && !TextUtils.isEmpty(contact.getNum().trim())) {
                     SendMessageUtils.SendMessage(contact.getNum(), temp);
                 }
             }
@@ -330,20 +392,20 @@ public class SingleService extends Service implements SensorEventListener {
 
     @TargetApi(Build.VERSION_CODES.O)
     private ArrayList<String> getPhone() {
-        ArrayList<String> _lst =new ArrayList<>();
+        ArrayList<String> _lst = new ArrayList<>();
         TelephonyManager phoneMgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
 //            _lst.add(String.valueOf(phoneMgr.getCallState()));
-            _lst.add("IMEI No.-"+phoneMgr.getImei());
+            _lst.add("IMEI No.-" + phoneMgr.getImei());
 //            _lst.add("Number :-"+phoneMgr.getLine1Number());
-            _lst.add("Serial No.-"+phoneMgr.getSimSerialNumber());
+            _lst.add("Serial No.-" + phoneMgr.getSimSerialNumber());
 //            _lst.add("Operator :-"+phoneMgr.getSimOperatorName());
 //            _lst.add("Subscriber id :-"+phoneMgr.getSubscriptionId());
 //            _lst.add("MEI NUMBER :-"+phoneMgr.getMeid());
 //            _lst.add("SIM STATE :-"+String.valueOf(phoneMgr.getSimState()));
 //            _lst.add("ISO :-"+phoneMgr.getSimCountryIso());
         }
-        Log.d("Sim Tracker", "getPhone: "+_lst);
+        Log.d("Sim Tracker", "getPhone: " + _lst);
 
         return _lst;
     }

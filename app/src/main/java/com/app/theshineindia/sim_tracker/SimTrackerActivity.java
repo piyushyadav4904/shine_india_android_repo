@@ -2,12 +2,17 @@ package com.app.theshineindia.sim_tracker;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -91,11 +96,17 @@ public class SimTrackerActivity extends AppCompatActivity {
                 SharedMethods.startAlarmManagerAndService(this);
                 constraintLayout4.setVisibility(View.VISIBLE);
                 emergencynum_recyclerview.setVisibility(View.VISIBLE);
+                TelephonyManager phoneMgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+                   String sim_serial_number = phoneMgr.getSimSerialNumber();
+                    SP.setStringPreference(this, SP.sim_serial_number, sim_serial_number);
+                }
             } else {
                 SP.setBooleanPreference(this, SP.is_sim_tracker_on, false);
                 constraintLayout4.setVisibility(View.GONE);
                 emergencynum_recyclerview.setVisibility(View.GONE);
                 SP.deleteContactListForSimTracker(this);
+                SP.setStringPreference(this, SP.sim_serial_number,null);
             }
         });
 

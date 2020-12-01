@@ -69,51 +69,101 @@ public class LoginActivity extends AppCompatActivity implements LoginPresenter.I
 
 
     private void requestPermission() {
-        Dexter.withActivity(this)
-                .withPermissions(
-                        Manifest.permission.CAMERA,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                        Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.READ_PHONE_STATE,
-                        Manifest.permission.SEND_SMS,
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION)
-                .withListener(new MultiplePermissionsListener() {
-                    @Override
-                    public void onPermissionsChecked(MultiplePermissionsReport report) {
-                        if (report.areAllPermissionsGranted()) {
+        if (Build.VERSION.SDK_INT<Build.VERSION_CODES.O){
+            Dexter.withActivity(this)
+                    .withPermissions(
+                            Manifest.permission.CAMERA,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.READ_PHONE_STATE,
+                            Manifest.permission.SEND_SMS,
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION)
+                    .withListener(new MultiplePermissionsListener() {
+                        @Override
+                        public void onPermissionsChecked(MultiplePermissionsReport report) {
+                            if (report.areAllPermissionsGranted()) {
 
 //                            TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
 //                            device_imei=telephonyManager.getDeviceId();
 
-                            device_imei = Secure.getString(getContentResolver(), Secure.ANDROID_ID);
+                                device_imei = Secure.getString(getContentResolver(), Secure.ANDROID_ID);
 
-                            String email = SP.getStringPreference(LoginActivity.this, SP.email);
-                            String password = SP.getStringPreference(LoginActivity.this, SP.password);
+                                String email = SP.getStringPreference(LoginActivity.this, SP.email);
+                                String password = SP.getStringPreference(LoginActivity.this, SP.password);
 
-                            Toast.makeText(LoginActivity.this, device_imei, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(LoginActivity.this, device_imei, Toast.LENGTH_SHORT).show();
 
 
-                            if (email != null && password != null) {
-                                iv_bg.setVisibility(View.VISIBLE);
-                                presenter.autoLogin(email, password);
+                                if (email != null && password != null) {
+                                    iv_bg.setVisibility(View.VISIBLE);
+                                    presenter.autoLogin(email, password);
+                                }
+                            }
+
+                            // check for permanent denial of any permission
+                            if (!report.areAllPermissionsGranted()) {
+                                Toast.makeText(LoginActivity.this, "Please allow all permission to continue", Toast.LENGTH_SHORT).show();
+                                finish();
                             }
                         }
 
-                        // check for permanent denial of any permission
-                        if (!report.areAllPermissionsGranted()) {
-                            Toast.makeText(LoginActivity.this, "Please allow all permission to continue", Toast.LENGTH_SHORT).show();
-                            finish();
+                        @Override
+                        public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
+                            token.continuePermissionRequest();
                         }
-                    }
+                    })
+                    .onSameThread()
+                    .check();
+        }else {
+            Dexter.withActivity(this)
+                    .withPermissions(
+                            Manifest.permission.CAMERA,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.READ_PHONE_STATE,
+                            Manifest.permission.READ_PHONE_NUMBERS,
+                            Manifest.permission.SEND_SMS,
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION)
+                    .withListener(new MultiplePermissionsListener() {
+                        @Override
+                        public void onPermissionsChecked(MultiplePermissionsReport report) {
+                            if (report.areAllPermissionsGranted()) {
 
-                    @Override
-                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
-                        token.continuePermissionRequest();
-                    }
-                })
-                .onSameThread()
-                .check();
+//                            TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+//                            device_imei=telephonyManager.getDeviceId();
+
+                                device_imei = Secure.getString(getContentResolver(), Secure.ANDROID_ID);
+
+                                String email = SP.getStringPreference(LoginActivity.this, SP.email);
+                                String password = SP.getStringPreference(LoginActivity.this, SP.password);
+
+                                Toast.makeText(LoginActivity.this, device_imei, Toast.LENGTH_SHORT).show();
+
+
+                                if (email != null && password != null) {
+                                    iv_bg.setVisibility(View.VISIBLE);
+                                    presenter.autoLogin(email, password);
+                                }
+                            }
+
+                            // check for permanent denial of any permission
+                            if (!report.areAllPermissionsGranted()) {
+                                Toast.makeText(LoginActivity.this, "Please allow all permission to continue", Toast.LENGTH_SHORT).show();
+                                finish();
+                            }
+                        }
+
+                        @Override
+                        public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
+                            token.continuePermissionRequest();
+                        }
+                    })
+                    .onSameThread()
+                    .check();
+        }
+
     }
 
 

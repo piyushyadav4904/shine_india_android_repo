@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "958961379571",
+    "firebase_url": "https://theshineindia-de1fe.firebaseio.com",
+    "project_id": "theshineindia-de1fe",
+    "storage_bucket": "theshineindia-de1fe.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:958961379571:android:92531b6df0ff6667d7ef86",
+        "android_client_info": {
+          "package_name": "com.app.theshineindia"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "958961379571-uc88085qeashjmmghckh903h2ul3m5pa.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB43AOnQq6K-uRaK4Rg2ZZ4DwzGsW-cimM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "958961379571-uc88085qeashjmmghckh903h2ul3m5pa.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

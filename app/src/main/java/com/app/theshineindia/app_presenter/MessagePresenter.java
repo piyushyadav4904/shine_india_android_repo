@@ -63,7 +63,7 @@ public class MessagePresenter extends BasePresenter {
 
             if (request_for != null && request_for.equals("sim_change")) {
                 SP.setBooleanPreference(context, SP.is_sim_card_changed, false);
-                SP.setBooleanPreference(context, SP.is_sim_tracker_on, false);
+//                SP.setBooleanPreference(context, SP.is_sim_tracker_on, false);
             }
         } catch (JSONException e) {
             e.printStackTrace();

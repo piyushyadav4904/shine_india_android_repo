@@ -24,6 +24,7 @@ import com.app.theshineindia.splash.versionutils.Const;
 import com.app.theshineindia.splash.versionutils.VersionListener;
 import com.app.theshineindia.utils.IntentController;
 import com.app.theshineindia.utils.SP;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -38,6 +39,9 @@ public class SplashActivity extends AppCompatActivity implements VersionListener
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Explicit initialization of Crashlytics is no longer required.
+        // OPTIONAL: If crash reporting has been explicitly disabled previously, add:
+        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true);
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -45,6 +49,8 @@ public class SplashActivity extends AppCompatActivity implements VersionListener
         setContentView(R.layout.activity_splash);
 
         checkVersion();
+
+//        throw new RuntimeException("Test Crash"); // Force a crash testing purpose firebase
     }
 
 

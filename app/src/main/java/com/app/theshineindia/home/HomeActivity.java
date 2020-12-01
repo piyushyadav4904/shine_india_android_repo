@@ -65,6 +65,10 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         phonepermission();
 
         //SharedMethods.startAlarmManagerAndService(this);
+
+        if (SP.getBooleanPreference(this, SP.is_sim_tracker_on)) {
+            SharedMethods.startAlarmManagerAndService(this);
+        }
     }
 
     private void phonepermission() {
