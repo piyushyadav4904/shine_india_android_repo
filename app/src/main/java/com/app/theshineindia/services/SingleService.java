@@ -261,15 +261,15 @@ public class SingleService extends Service implements SensorEventListener {
     }
 
     private void checkIsSimCardRemoved() {
-        if (SP.getStringPreference(this, SP.prev_sim_count) == null) return;
-        int prev_sim_count = Integer.parseInt(SP.getStringPreference(this, SP.prev_sim_count));
-        int current_sim_count = SharedMethods.getAvailableSimCount(this);
+//        if (SP.getStringPreference(this, SP.prev_sim_count) == null) return;
+//        int prev_sim_count = Integer.parseInt(SP.getStringPreference(this, SP.prev_sim_count));
+//        int current_sim_count = SharedMethods.getAvailableSimCount(this);
 
 
         TelephonyManager phoneMgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
 
-        Log.d(TAG, "checkIsSimCardRemoved_prev_sim_count: " + prev_sim_count);
-        Log.d(TAG, "checkIsSimCardRemoved_current_sim_count: " + current_sim_count);
+//        Log.d(TAG, "checkIsSimCardRemoved_prev_sim_count: " + prev_sim_count);
+//        Log.d(TAG, "checkIsSimCardRemoved_current_sim_count: " + current_sim_count);
         Log.d(TAG, "checkIsSimCardRemoved_serial_number_prev: " + SP.getStringPreference(this, SP.sim_serial_number));
         Log.d(TAG, "checkIsSimCardRemoved_serial_number_sim1: " + phoneMgr.getSimSerialNumber());
         if (DualSimManager.getSimSerialNumbersICCID(this).containsKey(DualSimManager.KEY_FOR_SIM_2)){
