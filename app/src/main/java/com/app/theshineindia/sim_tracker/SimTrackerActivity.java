@@ -103,12 +103,18 @@ public class SimTrackerActivity extends AppCompatActivity {
                 if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
                     String sim_1_serial_number = null;
                     String sim_2_serial_number = null;
-                    if (phoneMgr != null && phoneMgr.getSimSerialNumber() != null) {
+                    if (phoneMgr != null && phoneMgr.getSimOperatorName() != null) {
+                        sim_1_serial_number = phoneMgr.getSimOperatorName();
+                    }
+                    if (DualSimManager.getSimSimOperatorName(this).containsKey(DualSimManager.KEY_FOR_SIM_2)) {
+                        sim_2_serial_number = DualSimManager.getSimSimOperatorName(this).get(DualSimManager.KEY_FOR_SIM_2);
+                    }
+                    /*if (phoneMgr != null && phoneMgr.getSimSerialNumber() != null) {
                         sim_1_serial_number = phoneMgr.getSimSerialNumber();
                     }
                     if (DualSimManager.getSimSerialNumbersICCID(this).containsKey(DualSimManager.KEY_FOR_SIM_2)) {
                         sim_2_serial_number = DualSimManager.getSimSerialNumbersICCID(this).get(DualSimManager.KEY_FOR_SIM_2);
-                    }
+                    }*/
                     String temp = "";
                     if (sim_1_serial_number!=null){
                         temp = temp + sim_1_serial_number + ",";

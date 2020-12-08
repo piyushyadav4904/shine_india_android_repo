@@ -271,11 +271,52 @@ public class SingleService extends Service implements SensorEventListener {
 //        Log.d(TAG, "checkIsSimCardRemoved_prev_sim_count: " + prev_sim_count);
 //        Log.d(TAG, "checkIsSimCardRemoved_current_sim_count: " + current_sim_count);
         Log.d(TAG, "checkIsSimCardRemoved_serial_number_prev: " + SP.getStringPreference(this, SP.sim_serial_number));
-        Log.d(TAG, "checkIsSimCardRemoved_serial_number_sim1: " + phoneMgr.getSimSerialNumber());
-        if (DualSimManager.getSimSerialNumbersICCID(this).containsKey(DualSimManager.KEY_FOR_SIM_2)){
+//        Log.d(TAG, "checkIsSimCardRemoved_serial_number_sim1: " + phoneMgr.getSimSerialNumber());
+        /*if (DualSimManager.getSimSerialNumbersICCID(this).containsKey(DualSimManager.KEY_FOR_SIM_2)){
             Log.d(TAG, "checkIsSimCardRemoved_serial_number_sim2: " + DualSimManager.getSimSerialNumbersICCID(this).get(DualSimManager.KEY_FOR_SIM_2));
+        }*/
+        if (phoneMgr != null && phoneMgr.getSimOperatorName() != null) { // getting ICCID of sime 1  equivalent to  DualSimManager.getSimSerialNumbersICCID(this).containsKey(DualSimManager.KEY_FOR_SIM_1)
+            if (SP.getStringPreference(this, SP.sim_serial_number) != null &&
+                    !SP.getStringPreference(this, SP.sim_serial_number).contains(phoneMgr.getSimOperatorName())) { //it work even if sim removed then inserted (count same)
+
+                SP.setBooleanPreference(this, SP.is_sim_card_changed, true);
+                Log.d("1111", "Sim card removed ---->");
+
+                if (JSONFunctions.isInternetOn(this)) {
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            sendSOSMessage(phoneMgr.getSimOperatorName());
+                        }
+                    }, 20 * 1000);
+//                    new Handler().postDelayed(this::sendSOSMessage, 24 * 1000);
+                } else
+                    Log.d("1111", "No internet available: ");
+            }
+        } else if (DualSimManager.getSimSimOperatorName(this).containsKey(DualSimManager.KEY_FOR_SIM_2)) {
+            if (SP.getStringPreference(this, SP.sim_serial_number) != null &&
+                    !SP.getStringPreference(this, SP.sim_serial_number).
+                            contains(DualSimManager.getSimSimOperatorName(this).get(DualSimManager.KEY_FOR_SIM_2))) { //it work even if sim removed then inserted (count same)
+
+                SP.setBooleanPreference(this, SP.is_sim_card_changed, true);
+                Log.d("1111", "Sim card removed ---->");
+                if (JSONFunctions.isInternetOn(this)) {
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            sendSOSMessage(DualSimManager.getSimSimOperatorName(getApplicationContext()).get(DualSimManager.KEY_FOR_SIM_2));
+                        }
+                    }, 20 * 1000);
+//                    new Handler().postDelayed(this::sendSOSMessage, 24 * 1000);
+                } else
+                    Log.d("1111", "No internet available: ");
+                /*if (JSONFunctions.isInternetOn(this))
+                    new Handler().postDelayed(this::sendSOSMessage, 24 * 1000);
+                else
+                Log.d("1111", "No internet available: ");*/
+            }
         }
-            if (phoneMgr != null && phoneMgr.getSimSerialNumber() != null) { // getting ICCID of sime 1  equivalent to  DualSimManager.getSimSerialNumbersICCID(this).containsKey(DualSimManager.KEY_FOR_SIM_1)
+        /*if (phoneMgr != null && phoneMgr.getSimSerialNumber() != null) { // getting ICCID of sime 1  equivalent to  DualSimManager.getSimSerialNumbersICCID(this).containsKey(DualSimManager.KEY_FOR_SIM_1)
             if (SP.getStringPreference(this, SP.sim_serial_number) != null &&
                     !SP.getStringPreference(this, SP.sim_serial_number).contains(phoneMgr.getSimSerialNumber())) { //it work even if sim removed then inserted (count same)
 
@@ -286,7 +327,7 @@ public class SingleService extends Service implements SensorEventListener {
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                           sendSOSMessage( phoneMgr.getSimSerialNumber());
+                            sendSOSMessage(phoneMgr.getSimSerialNumber());
                         }
                     }, 20 * 1000);
 //                    new Handler().postDelayed(this::sendSOSMessage, 24 * 1000);
@@ -310,12 +351,12 @@ public class SingleService extends Service implements SensorEventListener {
 //                    new Handler().postDelayed(this::sendSOSMessage, 24 * 1000);
                 } else
                     Log.d("1111", "No internet available: ");
-                /*if (JSONFunctions.isInternetOn(this))
+                *//*if (JSONFunctions.isInternetOn(this))
                     new Handler().postDelayed(this::sendSOSMessage, 24 * 1000);
                 else
-                Log.d("1111", "No internet available: ");*/
+                Log.d("1111", "No internet available: ");*//*
             }
-        }
+        }*/
 
         /*current_time = System.currentTimeMillis();
         if (current_time - prev_time >= 25 * 1000) {
@@ -365,12 +406,23 @@ public class SingleService extends Service implements SensorEventListener {
                     !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.email).trim())) {
                 temp += "Email- " + SP.getStringPreference(getApplicationContext(), SP.email) + "\n";
             }
-            ArrayList<String> _lst = getPhone(simSerialNumberToSend);
-            if (_lst.size() > 0) {
-                for (int i = 0; i < _lst.size(); i++) {
-                    temp += _lst.get(i) + "\n";
-                }
+//            ArrayList<String> _lst = getPhone(simSerialNumberToSend);
+//            if (_lst.size() > 0) {
+//                for (int i = 0; i < _lst.size(); i++) {
+//                    temp += _lst.get(i) + "\n";
+//                }
+//            }
+            if (SP.getStringPreference(getApplicationContext(), SP.last_address) != null &&
+                    !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.last_address).trim())) {
+                temp += "Address- " + SP.getStringPreference(getApplicationContext(), SP.last_address) + "\n";
             }
+            if (SP.getStringPreference(getApplicationContext(), SP.last_latitude) != null &&
+                    !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.last_latitude).trim()) &&
+                    SP.getStringPreference(getApplicationContext(), SP.last_longitude) != null &&
+                    !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.last_longitude).trim())) {
+                temp += "LatLong- " + SP.getStringPreference(getApplicationContext(), SP.last_latitude) + ", " + SP.getStringPreference(getApplicationContext(), SP.last_longitude) + "\n";
+            }
+
             for (int i = 0; i < SP.getContactArrayListForSimTracker(getApplicationContext()).size(); i++) {
                 Contact contact = SP.getContactArrayListForSimTracker(getApplicationContext()).get(i);
                 if (contact.getNum() != null && !TextUtils.isEmpty(contact.getNum().trim())) {

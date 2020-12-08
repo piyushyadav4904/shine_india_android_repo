@@ -54,7 +54,8 @@ public class SecretCodeActivity extends AppCompatActivity {
     private OnScreenOffReceiver onScreenOffReceiver;
     private final List blockedKeys = new ArrayList(Arrays.asList(
             KeyEvent.KEYCODE_VOLUME_DOWN,
-            KeyEvent.KEYCODE_VOLUME_UP)
+            KeyEvent.KEYCODE_VOLUME_UP,
+            KeyEvent.KEYCODE_POWER)
     );
 
 

@@ -40,6 +40,29 @@ public class DualSimManager {
         return stringStringMap;
     }
 
+
+
+    // before calling this function please check runtime permission for phone_state
+    public static Map<String, String> getSimSimOperatorName(Context context){
+        String sim1OperatorName = null;
+        String sim2OperatorName = null;
+        HashMap<String, String> stringStringMap = new HashMap<>();
+        TelephonyManager telMngr = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE));
+        sim1OperatorName = telMngr.getSimOperatorName();
+        try{
+            sim2OperatorName = getDeviceIdBySlot(context, "getSimOperatorName", 1);
+        }catch (Exception e){
+            Log.d(TAG, "getSimSerialNumbersICCID_sim2: "+e.getMessage());
+        }
+        if (sim1OperatorName!=null){
+            stringStringMap.put(KEY_FOR_SIM_1, sim1OperatorName);
+        }
+        if (sim2OperatorName!=null){
+            stringStringMap.put(KEY_FOR_SIM_2, sim2OperatorName);
+        }
+        return stringStringMap;
+    }
+
     private static String getDeviceIdBySlot(Context context, String predictedMethodName, int slotID) throws ITgerMethodNotFoundException {
 
         String imsi = null;
