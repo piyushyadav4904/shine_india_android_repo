@@ -49,10 +49,11 @@ public class AdminReceiver extends DeviceAdminReceiver {
                 && SP.getBooleanPreference(context, SP.is_intruder_selfie_on)) {
 
             HiddenCamera hiddenCamera = new HiddenCamera(context);
+//            HiddenCameraKotlin hiddenCamera = new HiddenCameraKotlin(context);
             hiddenCamera.initializeCamera();
             hiddenCamera.captureCamera();
 
-            /*try {
+            try {
                 Intent myService = new Intent(context, CameraService.class);
                 myService.putExtra("Front_Request", true);
                 myService.putExtra("Quality_Mode", 50);
@@ -68,7 +69,7 @@ public class AdminReceiver extends DeviceAdminReceiver {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-            }*/
+            }
         }
     }
 

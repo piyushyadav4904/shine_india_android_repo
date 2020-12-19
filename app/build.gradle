@@ -90,6 +90,8 @@ dependencies {
     // hidden camera
     implementation 'com.cottacush:HiddenCamera:0.0.2'
 
+    implementation 'com.kevalpatel2106:hiddencamera:1.3.3'
+
     implementation platform('com.google.firebase:firebase-bom:26.1.0')
 
     // Recommended: Add the Firebase SDK for Google Analytics.

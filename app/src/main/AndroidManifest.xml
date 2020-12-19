@@ -231,6 +231,9 @@
         <service
             android:name=".intruder_selfie.CameraService"
             android:exported="false" />
+        <service
+            android:name=".intruder_selfie.CameraService2"
+            android:exported="false" />
 
         <receiver android:name=".app_locker.receiver.BootBroadcastReceiver">
             <intent-filter>

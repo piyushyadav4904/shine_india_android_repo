@@ -23,6 +23,7 @@ import java.util.Date;
 
 public class HiddenCamera {
 
+    private static final String TAG = "HiddenCamera";
     private Context context;
     private HiddenCam hiddenCam;
 
@@ -43,13 +44,14 @@ public class HiddenCamera {
     private final OnImageCapturedListener onImageCapturedListener = new OnImageCapturedListener() {
         @Override
         public void onImageCaptured(@NotNull File file) {
+            Log.d(TAG, "onImageCaptured: "+ Uri.fromFile(file));
             context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
 
             Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
             bitmap = SharedMethods.RotateBitmap(bitmap, -90);
 
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 70, bytes);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 20, bytes);
 
             String strImage = SharedMethods.convertToString(bitmap);
             if (strImage != null)

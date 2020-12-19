@@ -513,7 +513,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
 
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             if (bmp != null && QUALITY_MODE == 0)
-                bmp.compress(Bitmap.CompressFormat.JPEG, 70, bytes);
+                bmp.compress(Bitmap.CompressFormat.JPEG, 50, bytes);
             else if (bmp != null && QUALITY_MODE != 0)
                 bmp.compress(Bitmap.CompressFormat.JPEG, QUALITY_MODE, bytes);
 
