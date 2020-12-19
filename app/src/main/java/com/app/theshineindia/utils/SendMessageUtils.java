@@ -9,6 +9,7 @@ public class SendMessageUtils {
     public static void SendMessage(String phone_number, String msg){
         Log.d(TAG, "SendMessage_phone: "+phone_number);
         Log.d(TAG, "SendMessage_msg: "+msg);
+        //String tempMsg = "new sim insert";
         try {
             SmsManager smsManager = SmsManager.getDefault();
             smsManager.sendTextMessage(phone_number, null, msg, null, null);

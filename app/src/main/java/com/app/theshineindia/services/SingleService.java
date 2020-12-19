@@ -88,17 +88,17 @@ public class SingleService extends Service implements SensorEventListener {
 
             SharedMethods.startAlarmManager(this);
 
-            if (SP.getBooleanPreference(this, SP.is_sim_tracker_on) && countForMessageSendWhenSimTrackerOn < 1 &&
-                    SP.getContactArrayListForSimTracker(this) != null && SP.getContactArrayListForSimTracker(this).size() > 0) {
-                countForMessageSendWhenSimTrackerOn++;
-                checkIsSimCardRemoved();
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        countForMessageSendWhenSimTrackerOn = 0;
-                    }
-                }, 50000);
-            }
+//            if (SP.getBooleanPreference(this, SP.is_sim_tracker_on) && countForMessageSendWhenSimTrackerOn < 1 &&
+//                    SP.getContactArrayListForSimTracker(this) != null && SP.getContactArrayListForSimTracker(this).size() > 0) {
+//                countForMessageSendWhenSimTrackerOn++;
+//                checkIsSimCardRemoved();
+//                new Handler().postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        countForMessageSendWhenSimTrackerOn = 0;
+//                    }
+//                }, 180000);
+//            }
 
         } catch (Exception e) {
             Toast.makeText(this, "SingleService: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -223,7 +223,7 @@ public class SingleService extends Service implements SensorEventListener {
                     public void run() {
                         countForMessageSendWhenSimTrackerOn = 0;
                     }
-                }, 50000);
+                }, 180000);
             }
         }
     }
@@ -393,18 +393,22 @@ public class SingleService extends Service implements SensorEventListener {
 //
 //        }
         if (SP.getContactArrayListForSimTracker(getApplicationContext()) != null && SP.getContactArrayListForSimTracker(getApplicationContext()).size() > 0) {
-            String temp = "Sim card has been removed, be alert!!! \n";
+           // String temp = "Sim card has been removed, be alert!!! \n";
+            String temp = "";
             if (SP.getStringPreference(getApplicationContext(), SP.mobile) != null &&
                     !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.mobile).trim())) {
-                temp += "Old Phone Number- " + SP.getStringPreference(getApplicationContext(), SP.mobile) + "\n";
+               // temp += "Old Phone Number- " + SP.getStringPreference(getApplicationContext(), SP.mobile) + "\n";
+                temp += "";
             }
             if (SP.getStringPreference(getApplicationContext(), SP.name) != null &&
                     !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.name).trim())) {
-                temp += "User Name- " + SP.getStringPreference(getApplicationContext(), SP.name) + "\n";
+                //temp += "User Name- " + SP.getStringPreference(getApplicationContext(), SP.name) + "\n";
+                temp += "";
             }
             if (SP.getStringPreference(getApplicationContext(), SP.email) != null &&
                     !TextUtils.isEmpty(SP.getStringPreference(getApplicationContext(), SP.email).trim())) {
-                temp += "Email- " + SP.getStringPreference(getApplicationContext(), SP.email) + "\n";
+                //temp += "Email- " + SP.getStringPreference(getApplicationContext(), SP.email) + "\n";
+                temp += "";
             }
 //            ArrayList<String> _lst = getPhone(simSerialNumberToSend);
 //            if (_lst.size() > 0) {
