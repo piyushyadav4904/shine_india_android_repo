@@ -8,10 +8,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.telephony.SubscriptionInfo;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
@@ -33,6 +37,7 @@ import com.app.theshineindia.utils.Validator;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class SimTrackerActivity extends AppCompatActivity {
     private static final String TAG = "SimTrackerActivity";
@@ -82,6 +87,7 @@ public class SimTrackerActivity extends AppCompatActivity {
     }
 
 
+    @SuppressLint("HardwareIds")
     private void iniListener() {
         if (SP.getBooleanPreference(this, SP.is_sim_tracker_on)) {
             switch_sim_tracker.setChecked(true);
@@ -103,18 +109,53 @@ public class SimTrackerActivity extends AppCompatActivity {
                 if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
                     String sim_1_serial_number = null;
                     String sim_2_serial_number = null;
-                    if (phoneMgr != null && phoneMgr.getSimOperatorName() != null) {
-                        sim_1_serial_number = phoneMgr.getSimOperatorName();
+
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                        SubscriptionManager subsManager = (SubscriptionManager) this.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
+
+                        List<SubscriptionInfo> subsList = subsManager.getActiveSubscriptionInfoList();
+
+                        if (subsList!=null) {
+
+                            for (int i = 0; i < subsList.size(); i++) {
+                                if (i==0){
+                                    if (subsList.get(i) != null) {
+                                        sim_1_serial_number  = subsList.get(i).getIccId();
+                                    }
+                                }
+                                else if (i==1){
+                                    if (subsList.get(i) != null) {
+                                        sim_2_serial_number  = subsList.get(i).getIccId();
+                                    }
+                                }
+                            }
+
+                        }
+                    } else {
+
+                        if (phoneMgr != null && phoneMgr.getSimOperatorName() != null) {
+                            sim_1_serial_number = phoneMgr.getSimSerialNumber();
+                        }
+                        if (DualSimManager.getSimSimOperatorName(this).containsKey(DualSimManager.KEY_FOR_SIM_2)) {
+                            sim_2_serial_number = DualSimManager.getSimSerialNumbersICCID(this).get(DualSimManager.KEY_FOR_SIM_2);
+                        }
+
                     }
-                    if (DualSimManager.getSimSimOperatorName(this).containsKey(DualSimManager.KEY_FOR_SIM_2)) {
-                        sim_2_serial_number = DualSimManager.getSimSimOperatorName(this).get(DualSimManager.KEY_FOR_SIM_2);
-                    }
+
+                    Log.d(TAG, "sim_serial_numbers: "+sim_1_serial_number);
+                    System.out.println("sim_SERIAL_NO ---- >>"+sim_1_serial_number);
+
+
+
                     /*if (phoneMgr != null && phoneMgr.getSimSerialNumber() != null) {
                         sim_1_serial_number = phoneMgr.getSimSerialNumber();
                     }
                     if (DualSimManager.getSimSerialNumbersICCID(this).containsKey(DualSimManager.KEY_FOR_SIM_2)) {
                         sim_2_serial_number = DualSimManager.getSimSerialNumbersICCID(this).get(DualSimManager.KEY_FOR_SIM_2);
                     }*/
+
+
                     String temp = "";
                     if (sim_1_serial_number!=null){
                         temp = temp + sim_1_serial_number + ",";
@@ -124,6 +165,8 @@ public class SimTrackerActivity extends AppCompatActivity {
                     }
                     Log.d(TAG, "sim_serial_numbers: "+temp);
                     SP.setStringPreference(this, SP.sim_serial_number, temp);
+
+
                 }
             } else {
                 SP.setBooleanPreference(this, SP.is_sim_tracker_on, false);
