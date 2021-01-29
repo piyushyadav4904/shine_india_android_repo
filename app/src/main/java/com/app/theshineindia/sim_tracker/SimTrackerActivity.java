@@ -1,5 +1,6 @@
 package com.app.theshineindia.sim_tracker;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
@@ -10,10 +11,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
@@ -27,6 +30,7 @@ import android.widget.Toast;
 import com.app.theshineindia.R;
 import com.app.theshineindia.baseclasses.SharedMethods;
 import com.app.theshineindia.location.LocationTestActivity;
+import com.app.theshineindia.login.LoginActivity;
 import com.app.theshineindia.sos.Contact;
 import com.app.theshineindia.sos.SOSActivity;
 import com.app.theshineindia.sos.SOSAdapter;
@@ -35,6 +39,11 @@ import com.app.theshineindia.utils.IntentController;
 import com.app.theshineindia.utils.SP;
 import com.app.theshineindia.utils.Validator;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.MultiplePermissionsReport;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +59,8 @@ public class SimTrackerActivity extends AppCompatActivity {
     RecyclerView emergencynum_recyclerview;
     RecyclerViewAdapter mAdapter;
     ArrayList<Contact> contacts;
+
+    AlertDialog.Builder builder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,74 +112,13 @@ public class SimTrackerActivity extends AppCompatActivity {
 
         switch_sim_tracker.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
-                SP.setBooleanPreference(this, SP.is_sim_tracker_on, true);
-                SharedMethods.startAlarmManagerAndService(this);
-                constraintLayout4.setVisibility(View.VISIBLE);
-                emergencynum_recyclerview.setVisibility(View.VISIBLE);
-                TelephonyManager phoneMgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-                if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
-                    String sim_1_serial_number = null;
-                    String sim_2_serial_number = null;
+                openAlertDialog();
 
+                //off this if you need the dialog and openAleartDialog
+                //switchPressWork();
 
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-                        SubscriptionManager subsManager = (SubscriptionManager) this.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
-
-                        List<SubscriptionInfo> subsList = subsManager.getActiveSubscriptionInfoList();
-
-                        if (subsList!=null) {
-
-                            for (int i = 0; i < subsList.size(); i++) {
-                                if (i==0){
-                                    if (subsList.get(i) != null) {
-                                        sim_1_serial_number  = subsList.get(i).getIccId();
-                                    }
-                                }
-                                else if (i==1){
-                                    if (subsList.get(i) != null) {
-                                        sim_2_serial_number  = subsList.get(i).getIccId();
-                                    }
-                                }
-                            }
-
-                        }
-                    } else {
-
-                        if (phoneMgr != null && phoneMgr.getSimOperatorName() != null) {
-                            sim_1_serial_number = phoneMgr.getSimSerialNumber();
-                        }
-                        if (DualSimManager.getSimSimOperatorName(this).containsKey(DualSimManager.KEY_FOR_SIM_2)) {
-                            sim_2_serial_number = DualSimManager.getSimSerialNumbersICCID(this).get(DualSimManager.KEY_FOR_SIM_2);
-                        }
-
-                    }
-
-                    Log.d(TAG, "sim_serial_numbers: "+sim_1_serial_number);
-                    System.out.println("sim_SERIAL_NO ---- >>"+sim_1_serial_number);
-
-
-
-                    /*if (phoneMgr != null && phoneMgr.getSimSerialNumber() != null) {
-                        sim_1_serial_number = phoneMgr.getSimSerialNumber();
-                    }
-                    if (DualSimManager.getSimSerialNumbersICCID(this).containsKey(DualSimManager.KEY_FOR_SIM_2)) {
-                        sim_2_serial_number = DualSimManager.getSimSerialNumbersICCID(this).get(DualSimManager.KEY_FOR_SIM_2);
-                    }*/
-
-
-                    String temp = "";
-                    if (sim_1_serial_number!=null){
-                        temp = temp + sim_1_serial_number + ",";
-                    }
-                    if (sim_2_serial_number!=null){
-                        temp = temp + sim_2_serial_number;
-                    }
-                    Log.d(TAG, "sim_serial_numbers: "+temp);
-                    SP.setStringPreference(this, SP.sim_serial_number, temp);
-
-
-                }
-            } else {
+            }
+            else {
                 SP.setBooleanPreference(this, SP.is_sim_tracker_on, false);
                 constraintLayout4.setVisibility(View.GONE);
                 emergencynum_recyclerview.setVisibility(View.GONE);
@@ -200,10 +150,128 @@ public class SimTrackerActivity extends AppCompatActivity {
         });
     }
 
+    private void openAlertDialog() {
+        builder = new AlertDialog.Builder(this);
+        builder.setMessage("Do you want to active sim tracker service ?")
+                .setCancelable(false)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                        getPermissionWork();
+
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        switch_sim_tracker.setChecked(false);
+                        dialog.cancel();
+                    }
+                });
+        //Creating dialog box
+        AlertDialog alert = builder.create();
+        //Setting the title manually
+        alert.setTitle("Sim Tracker");
+        alert.show();
+}
+
+    private void getPermissionWork() {
+        Dexter.withActivity(this)
+                .withPermissions(
+                        Manifest.permission.READ_PHONE_STATE,
+                        Manifest.permission.READ_PHONE_NUMBERS,
+                        Manifest.permission.SEND_SMS)
+                .withListener(new MultiplePermissionsListener() {
+                    @Override
+                    public void onPermissionsChecked(MultiplePermissionsReport report) {
+                        if (report.areAllPermissionsGranted()) {
+                            switchPressWork();
+                        }
+
+                        // check for permanent denial of any permission
+                        else if (!report.areAllPermissionsGranted()) {
+                            Toast.makeText(SimTrackerActivity.this, "Please allow all permission to continue", Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
+                    }
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
+                        token.continuePermissionRequest();
+                    }
+                })
+                .onSameThread()
+                .check();
+    }
+
+    private void switchPressWork() {
+        SP.setBooleanPreference(this, SP.is_sim_tracker_on, true);
+        SharedMethods.startAlarmManagerAndService(this);
+        constraintLayout4.setVisibility(View.VISIBLE);
+        emergencynum_recyclerview.setVisibility(View.VISIBLE);
+        TelephonyManager phoneMgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+            String sim_1_serial_number = null;
+            String sim_2_serial_number = null;
+
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                SubscriptionManager subsManager = (SubscriptionManager) this.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
+
+                List<SubscriptionInfo> subsList = subsManager.getActiveSubscriptionInfoList();
+
+                if (subsList!=null) {
+
+                    for (int i = 0; i < subsList.size(); i++) {
+                        if (i==0){
+                            if (subsList.get(i) != null) {
+                                sim_1_serial_number  = subsList.get(i).getIccId();
+                            }
+                        }
+                        else if (i==1){
+                            if (subsList.get(i) != null) {
+                                sim_2_serial_number  = subsList.get(i).getIccId();
+                            }
+                        }
+                    }
+
+                }
+            } else {
+
+                if (phoneMgr != null && phoneMgr.getSimOperatorName() != null) {
+                    sim_1_serial_number = phoneMgr.getSimSerialNumber();
+                }
+                if (DualSimManager.getSimSimOperatorName(this).containsKey(DualSimManager.KEY_FOR_SIM_2)) {
+                    sim_2_serial_number = DualSimManager.getSimSerialNumbersICCID(this).get(DualSimManager.KEY_FOR_SIM_2);
+                }
+
+            }
+
+            Log.d(TAG, "sim_serial_numbers: "+sim_1_serial_number);
+            System.out.println("sim_SERIAL_NO ---- >>"+sim_1_serial_number);
 
 
 
+                    /*if (phoneMgr != null && phoneMgr.getSimSerialNumber() != null) {
+                        sim_1_serial_number = phoneMgr.getSimSerialNumber();
+                    }
+                    if (DualSimManager.getSimSerialNumbersICCID(this).containsKey(DualSimManager.KEY_FOR_SIM_2)) {
+                        sim_2_serial_number = DualSimManager.getSimSerialNumbersICCID(this).get(DualSimManager.KEY_FOR_SIM_2);
+                    }*/
 
+
+            String temp = "";
+            if (sim_1_serial_number!=null){
+                temp = temp + sim_1_serial_number + ",";
+            }
+            if (sim_2_serial_number!=null){
+                temp = temp + sim_2_serial_number;
+            }
+            Log.d(TAG, "sim_serial_numbers: "+temp);
+            SP.setStringPreference(this, SP.sim_serial_number, temp);
+
+
+        }
+    }
 
 
     private void setupRecyclerView() {
