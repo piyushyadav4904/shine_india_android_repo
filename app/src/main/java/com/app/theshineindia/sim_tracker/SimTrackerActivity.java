@@ -152,7 +152,7 @@ public class SimTrackerActivity extends AppCompatActivity {
 
     private void openAlertDialog() {
         builder = new AlertDialog.Builder(this);
-        builder.setMessage("Do you want to active sim tracker service ?")
+        builder.setMessage("This feature requires SMS permission to work properly as changing of Sim card will automatically send SMS to registered numbers at background, do you want to allow?")
                 .setCancelable(false)
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
@@ -170,37 +170,65 @@ public class SimTrackerActivity extends AppCompatActivity {
         //Creating dialog box
         AlertDialog alert = builder.create();
         //Setting the title manually
-        alert.setTitle("Sim Tracker");
+        alert.setTitle("Need SMS permission");
         alert.show();
-}
+    }
 
     private void getPermissionWork() {
-        Dexter.withActivity(this)
-                .withPermissions(
-                        Manifest.permission.READ_PHONE_STATE,
-                        Manifest.permission.READ_PHONE_NUMBERS,
-                        Manifest.permission.SEND_SMS)
-                .withListener(new MultiplePermissionsListener() {
-                    @Override
-                    public void onPermissionsChecked(MultiplePermissionsReport report) {
-                        if (report.areAllPermissionsGranted()) {
-                            switchPressWork();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Dexter.withActivity(this)
+                    .withPermissions(
+                            Manifest.permission.READ_PHONE_STATE,
+                            Manifest.permission.READ_PHONE_NUMBERS,
+                            Manifest.permission.SEND_SMS)
+                    .withListener(new MultiplePermissionsListener() {
+                        @Override
+                        public void onPermissionsChecked(MultiplePermissionsReport report) {
+                            if (report.areAllPermissionsGranted()) {
+                                switchPressWork();
+                            }
+
+                            // check for permanent denial of any permission
+                            else if (!report.areAllPermissionsGranted()) {
+                                Toast.makeText(SimTrackerActivity.this, "Please allow all permission to continue", Toast.LENGTH_SHORT).show();
+                                finish();
+                            }
                         }
 
-                        // check for permanent denial of any permission
-                        else if (!report.areAllPermissionsGranted()) {
-                            Toast.makeText(SimTrackerActivity.this, "Please allow all permission to continue", Toast.LENGTH_SHORT).show();
-                            finish();
+                        @Override
+                        public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
+                            token.continuePermissionRequest();
                         }
-                    }
+                    })
+                    .onSameThread()
+                    .check();
+        }else {
+            Dexter.withActivity(this)
+                    .withPermissions(
+                            Manifest.permission.READ_PHONE_STATE,
+                            Manifest.permission.SEND_SMS)
+                    .withListener(new MultiplePermissionsListener() {
+                        @Override
+                        public void onPermissionsChecked(MultiplePermissionsReport report) {
+                            if (report.areAllPermissionsGranted()) {
+                                switchPressWork();
+                            }
 
-                    @Override
-                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
-                        token.continuePermissionRequest();
-                    }
-                })
-                .onSameThread()
-                .check();
+                            // check for permanent denial of any permission
+                            else if (!report.areAllPermissionsGranted()) {
+                                Toast.makeText(SimTrackerActivity.this, "Please allow all permission to continue", Toast.LENGTH_SHORT).show();
+                                finish();
+                            }
+                        }
+
+                        @Override
+                        public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
+                            token.continuePermissionRequest();
+                        }
+                    })
+                    .onSameThread()
+                    .check();
+        }
     }
 
     private void switchPressWork() {
