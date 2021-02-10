@@ -152,7 +152,7 @@ public class SimTrackerActivity extends AppCompatActivity {
 
     private void openAlertDialog() {
         builder = new AlertDialog.Builder(this);
-        builder.setMessage("This feature requires SMS permission to work properly as changing of Sim card will automatically send SMS to registered numbers at background, do you want to allow?")
+        builder.setMessage("This feature requires SMS permission to work properly as changing of Sim card will automatically send SMS with latitude and longitude of user's current location to registered numbers at background for their Physical safety/Emergency alert, do you want to allow?")
                 .setCancelable(false)
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
