@@ -105,6 +105,7 @@ public class SecretCodeActivity extends AppCompatActivity {
 
             }
         });
+
     }
 
     private void setToolbar() {
@@ -161,7 +162,7 @@ public class SecretCodeActivity extends AppCompatActivity {
     //======================== disable system hardware =============================
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        //Log.d("1111", "dispatchKeyEvent: " + event.getKeyCode());
+        Log.d("1111", "dispatchKeyEvent: " + event.getKeyCode());
         if (blockedKeys.contains(event.getKeyCode())) {
             return true;
         } else {
