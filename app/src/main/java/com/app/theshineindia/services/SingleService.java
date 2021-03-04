@@ -524,9 +524,12 @@ public class SingleService extends Service implements SensorEventListener {
 
             for (int i = 0; i < SP.getContactArrayListForSimTracker(getApplicationContext()).size(); i++) {
                 Contact contact = SP.getContactArrayListForSimTracker(getApplicationContext()).get(i);
-                if (contact.getNum() != null && !TextUtils.isEmpty(contact.getNum().trim())) {
-                    SendMessageUtils.SendMessage(contact.getNum(), temp);
-                }
+
+                // SEND SMS FROM PHONE DISABLE AS PER CLIENT REQUERMENT..
+
+//                if (contact.getNum() != null && !TextUtils.isEmpty(contact.getNum().trim())) {
+//                    SendMessageUtils.SendMessage(contact.getNum(), temp);
+//                }
             }
         }
 

@@ -179,8 +179,9 @@ public class SimTrackerActivity extends AppCompatActivity {
             Dexter.withActivity(this)
                     .withPermissions(
                             Manifest.permission.READ_PHONE_STATE,
-                            Manifest.permission.READ_PHONE_NUMBERS,
-                            Manifest.permission.SEND_SMS)
+                            Manifest.permission.READ_PHONE_NUMBERS
+                            //,Manifest.permission.SEND_SMS
+                    )
                     .withListener(new MultiplePermissionsListener() {
                         @Override
                         public void onPermissionsChecked(MultiplePermissionsReport report) {
@@ -205,8 +206,9 @@ public class SimTrackerActivity extends AppCompatActivity {
         }else {
             Dexter.withActivity(this)
                     .withPermissions(
-                            Manifest.permission.READ_PHONE_STATE,
-                            Manifest.permission.SEND_SMS)
+                            Manifest.permission.READ_PHONE_STATE
+                            //,Manifest.permission.SEND_SMS
+                    )
                     .withListener(new MultiplePermissionsListener() {
                         @Override
                         public void onPermissionsChecked(MultiplePermissionsReport report) {
