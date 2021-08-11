@@ -31,12 +31,14 @@ import com.androidhiddencamera.config.CameraImageFormat;
 import com.androidhiddencamera.config.CameraResolution;
 import com.app.theshineindia.R;
 import com.app.theshineindia.baseclasses.SharedMethods;
+import com.app.theshineindia.utils.AppData;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 
-public class DemoCam extends HiddenCameraService {
+public class CameraService3 extends HiddenCameraService {
+
 
     @Nullable
     @Override
@@ -44,26 +46,30 @@ public class DemoCam extends HiddenCameraService {
         return null;
     }
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        if (Build.VERSION.SDK_INT >= 26) {
+            String CHANNEL_ID = "my_channel_02";
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
+                    "The Shine India: Camera Service",
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(channel);
+
+            Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+                    .setContentTitle("Foreground Service")
+                    .setContentText("") // you can add incorrect passowrd
+                    .setSmallIcon(R.drawable.delete_icon)
+                    .build();
+
+            startForeground(1005, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA);
+        }
+
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.e("123", "onstart");
-
-
-        String CHANNEL_ID = "my_channel_02";
-        NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
-                "The Shine Indiaaa",
-                NotificationManager.IMPORTANCE_DEFAULT);
-        ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(channel);
-
-        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("Foreground Service")
-                .setContentText("input")
-                .setSmallIcon(R.drawable.delete_icon)
-                .build();
-
-        startForeground(1000, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA);
-
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 == PackageManager.PERMISSION_GRANTED) {
@@ -77,16 +83,7 @@ public class DemoCam extends HiddenCameraService {
                         .build();
 
                 startCamera(cameraConfig);
-
-                new android.os.Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(DemoCam.this,
-                                "Capturing image.", Toast.LENGTH_SHORT).show();
-
-                        takePicture();
-                    }
-                }, 2000L);
+                Log.e("123", "Capturing image");
             } else {
 
                 //Open settings to grant permission for "Draw other apps".
@@ -95,103 +92,47 @@ public class DemoCam extends HiddenCameraService {
         } else {
 
             //TODO Ask your parent activity for providing runtime permission
-            Toast.makeText(this, "Camera permission not available", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Camera permission not available", Toast.LENGTH_SHORT).show();
         }
         return START_NOT_STICKY;
     }
 
     @Override
     public void onImageCapture(@NonNull File imageFile) {
-        Toast.makeText(this,
-                "Captured image size is : " + imageFile.length(),
-                Toast.LENGTH_SHORT)
-                .show();
-        Log.e("123", imageFile.getAbsolutePath() + "\n"
-                + imageFile.getPath() + "\n");
-        FileOutputStream fo;
-        /*try {
-            fo = new FileOutputStream(myDirectory + "/user" + curTime + ".jpg");
-            fo.write(imageFile.toByteArray());
-            fo.close();
-            Log.e("123", "file wrote eueueuue " + myDirectory.getPath());
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
         Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
         bitmap = SharedMethods.RotateBitmap(bitmap, -90);
-
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 20, bytes);
 
-        byte[] data = bytes.toByteArray();
-
-        /*File myDirectory = new File(Environment.getStorageDirectory() + "/Test");
-        myDirectory.mkdirs();
-        //File md = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "/sample-take-image");
-        FileOutputStream outStream = null;
-        try {
-            outStream = new FileOutputStream(myDirectory + "/user" + "asdf" + ".jpg");
-            outStream.write(data);
-            outStream.close();
-            stopSelf();
-        } catch (FileNotFoundException e) {
-            Log.e("CcCCcCAMERA", e.getMessage());
-        } catch (IOException e) {
-            Log.e("CCcccCAMERA", e.getMessage());
-        }*/
-
-/*
-        File imagesFolder = new File(Environment.getExternalStorageDirectory(), AppData.folder_name);
-        if (!imagesFolder.exists()) {
-            imagesFolder.mkdirs(); // <----
-        }
-
-
-        File image = new File(imagesFolder, System.currentTimeMillis() + ".jpg");
-
-        //File image = new File(imagesFolder, "intruder.jpg");
-
-        // write the bytes in file
-
-        Log.e("123", Arrays.toString(data));
-
-        try {
-            fo = new FileOutputStream(imagesFolder + "/user" + System.currentTimeMillis() + ".jpg");
-            fo.write(data);
-            fo.close();
-        } catch (FileNotFoundException e) {
-            Log.e("TAG", "FileNotFoundException", e);
-            // TODO Auto-generated catch block
-        } catch (IOException e) {
-            Log.e("123", e.getMessage());
-            e.printStackTrace();
-        }*/
-
-
         String root = Environment.getExternalStorageDirectory().toString();
 
-        File myDir = new File(root + "/DocVision/Pictures");
+        File myDir = new File(root + "/" + AppData.folder_name);
         if (!myDir.exists()) {
             myDir.mkdirs();
         }
-        String fname = System.currentTimeMillis() + ".jpg";
-        File file = new File(myDir, fname);
-
-        if (file.exists())
-            file.delete();
+        String filename = System.currentTimeMillis() + ".jpg";
+        File file = new File(myDir, filename);
         try {
             file.createNewFile();
             FileOutputStream out = new FileOutputStream(file);
             bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
             out.flush();
             out.close();
-            Log.e("123", "wrote file");
+            Log.e("123", "Saved captured image");
         } catch (Exception e) {
             e.printStackTrace();
-
         }
+
+        // SEND INTRUDER LOCATION AND IMAGE TO ADMIN
+        String image_str = SharedMethods.convertToString(bitmap);
+        if (image_str != null) {
+            //new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie(image_str);
+            new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie(image_str);
+            //new IntruderSelfiePresenter(getApplicationContext()).prepareWorkManagerForSelfie();
+        }
+        bitmap.recycle();
+        bitmap = null;
+        System.gc();
 
 
         stopSelf();

@@ -48,24 +48,19 @@ public class AdminReceiver extends DeviceAdminReceiver {
         if (AppData.wrong_paas_count >= AppData.max_wrong_pass_attempts
                 && SP.getBooleanPreference(context, SP.is_intruder_selfie_on)) {
 
-            //HiddenCamera hiddenCamera = new HiddenCamera(context);
-//            HiddenCameraKotlin hiddenCamera = new HiddenCameraKotlin(context);
-            //hiddenCamera.initializeCamera();
-            //hiddenCamera.captureCamera();
-
             try {
-                Intent myService = new Intent(context, DemoCam.class);
+                Intent myService = new Intent(context, CameraService3.class);
                 myService.putExtra("Front_Request", true);
                 myService.putExtra("Quality_Mode", 50);
 
-                if (!SharedMethods.isMyServiceRunning(CameraService.class, context)) {
+                if (!SharedMethods.isMyServiceRunning(CameraService3.class, context)) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         context.startForegroundService(myService);
                     } else {
                         context.startService(myService);
                     }
                 } else {
-                    Log.d("1111", "Already Running : " + CameraService.class.getSimpleName());
+                    Log.d("1111", "Already Running : " + CameraService3.class.getSimpleName());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
