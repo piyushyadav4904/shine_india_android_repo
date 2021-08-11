@@ -17,6 +17,8 @@
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
+
     <uses-permission android:name="android.permission.GET_TASKS" />
     <uses-permission
         android:name="android.permission.PACKAGE_USAGE_STATS"
@@ -246,6 +248,14 @@
             android:foregroundServiceType="camera"/>
         <service
             android:name=".intruder_selfie.CameraService2"
+            android:exported="false"
+            android:foregroundServiceType="camera"/>
+        <service
+            android:name=".intruder_selfie.CamService"
+            android:exported="false"
+            android:foregroundServiceType="camera"/>
+        <service
+            android:name=".intruder_selfie.DemoCam"
             android:exported="false"
             android:foregroundServiceType="camera"/>
 

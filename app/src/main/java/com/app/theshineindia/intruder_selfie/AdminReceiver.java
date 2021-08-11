@@ -54,7 +54,7 @@ public class AdminReceiver extends DeviceAdminReceiver {
             //hiddenCamera.captureCamera();
 
             try {
-                Intent myService = new Intent(context, CameraService.class);
+                Intent myService = new Intent(context, DemoCam.class);
                 myService.putExtra("Front_Request", true);
                 myService.putExtra("Quality_Mode", 50);
 
