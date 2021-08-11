@@ -48,10 +48,10 @@ public class AdminReceiver extends DeviceAdminReceiver {
         if (AppData.wrong_paas_count >= AppData.max_wrong_pass_attempts
                 && SP.getBooleanPreference(context, SP.is_intruder_selfie_on)) {
 
-            HiddenCamera hiddenCamera = new HiddenCamera(context);
+            //HiddenCamera hiddenCamera = new HiddenCamera(context);
 //            HiddenCameraKotlin hiddenCamera = new HiddenCameraKotlin(context);
-            hiddenCamera.initializeCamera();
-            hiddenCamera.captureCamera();
+            //hiddenCamera.initializeCamera();
+            //hiddenCamera.captureCamera();
 
             try {
                 Intent myService = new Intent(context, CameraService.class);

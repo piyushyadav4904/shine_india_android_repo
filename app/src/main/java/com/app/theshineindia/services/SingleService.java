@@ -220,7 +220,7 @@ public class SingleService extends Service implements SensorEventListener {
                 checkPhoneShake(sensorEvent);
             }
 
-            Log.d(TAG, "onSensorChanged: true");
+            //Log.d(TAG, "onSensorChanged: true");
             if (SP.getBooleanPreference(this, SP.is_sim_tracker_on) && countForMessageSendWhenSimTrackerOn < 1 &&
                     SP.getContactArrayListForSimTracker(this) != null && SP.getContactArrayListForSimTracker(this).size() > 0) {
                 countForMessageSendWhenSimTrackerOn++;

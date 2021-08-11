@@ -30,6 +30,7 @@ import android.view.SurfaceView;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
@@ -41,9 +42,18 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 
 public class CameraService extends Service implements SurfaceHolder.Callback {
 
+    public Intent cameraIntent;
+    FileOutputStream fo;
+    SurfaceView sv;
+    WindowManager.LayoutParams params;
+    SharedPreferences pref;
+    SharedPreferences.Editor editor;
+    int width = 0, height = 0;
+    Handler handler = new Handler();
     // Camera variables
     // a surface holder
     // a variable to control the camera
@@ -51,19 +61,174 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
     // the camera parameters
     private Camera.Parameters parameters;
     private Bitmap bmp;
-    FileOutputStream fo;
     private String FLASH_MODE;
     private int QUALITY_MODE = 0;
+    Camera.PictureCallback mCall = new Camera.PictureCallback() {
+
+        @Override
+        public void onPictureTaken(byte[] data, Camera camera) {
+            // decode the data obtained by the camera into a Bitmap
+            Log.d("ImageTakin", "Done");
+            if (bmp != null)
+                bmp.recycle();
+            System.gc();
+            bmp = decodeBitmap(data);
+
+            bmp = SharedMethods.RotateBitmap(bmp, -90);
+
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            if (bmp != null && QUALITY_MODE == 0)
+                bmp.compress(Bitmap.CompressFormat.JPEG, 50, bytes);
+            else if (bmp != null && QUALITY_MODE != 0)
+                bmp.compress(Bitmap.CompressFormat.JPEG, QUALITY_MODE, bytes);
+
+            /*File imagesFolder = new File(Environment.getExternalStorageDirectory(), AppData.folder_name);
+            if (!imagesFolder.exists()) {
+                imagesFolder.mkdirs(); // <----
+            }
+
+
+            File image = new File(imagesFolder, System.currentTimeMillis() + ".jpg");
+
+            //File image = new File(imagesFolder, "intruder.jpg");
+
+            // write the bytes in file
+            try {
+                fo = new FileOutputStream(imagesFolder + "/user" + System.currentTimeMillis() + ".jpg");;
+            } catch (FileNotFoundException e) {
+                Log.e("TAG", "FileNotFoundException", e);
+                // TODO Auto-generated catch block
+            }
+            try {
+                fo.write(bytes.toByteArray());
+            } catch (IOException e) {
+                Log.e("TAG", "fo.write::PictureTaken", e);
+                // TODO Auto-generated catch block
+            }*/
+
+
+            File myDirectory = new File(Environment.getExternalStorageDirectory() + "/Test");
+            // have the object build the directory structure, if needed.
+            myDirectory.mkdirs();
+
+            //SDF for getting current time for unique image name
+            SimpleDateFormat curTimeFormat = new SimpleDateFormat("ddMMyyyyhhmmss");
+            String curTime = curTimeFormat.format(new java.util.Date());
+
+            // create a File object for the output file
+            try {
+                fo = new FileOutputStream(myDirectory + "/user" + curTime + ".jpg");
+                fo.write(bytes.toByteArray());
+                fo.close();
+                Log.e("123", "file wrote eueueuue " + myDirectory.getPath());
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+            // remember close de FileOutput
+            /*try {
+                fo.close();
+                if (Build.VERSION.SDK_INT < 19)
+                    sendBroadcast(new Intent(
+                            Intent.ACTION_MEDIA_MOUNTED,
+                            Uri.parse("file://" + Environment.getExternalStorageDirectory())));
+                else {
+                    MediaScannerConnection
+                            .scanFile(
+                                    getApplicationContext(),
+                                    new String[]{image.toString()},
+                                    null,
+                                    new MediaScannerConnection.OnScanCompletedListener() {
+                                        public void onScanCompleted(String path, Uri uri) {
+                                            Log.i("ExternalStorage", "Scanned " + path + ":");
+                                            Log.i("ExternalStorage", "-> uri=" + uri);
+                                        }
+                                    });
+                }
+
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            if (mCamera != null) {
+                mCamera.stopPreview();
+                mCamera.release();
+                mCamera = null;
+            }
+            *//*
+             * Toast.makeText(getApplicationContext(),
+             * "Your Picture has been taken !", Toast.LENGTH_LONG).show();
+             *//*
+            Log.d("Camera", "Image Taken !");
+//            if (bmp != null) {
+//                bmp.recycle();
+//                bmp = null;
+//                System.gc();
+//            }
+
+            if (bmp != null) {
+                // SEND INTRUDER LOCATION AND IMAGE TO ADMIN
+                String image_str = SharedMethods.convertToString(bmp);
+                if (image_str != null)
+                    //     new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie(image_str);
+                    new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie2(image_str, image);
+                //new IntruderSelfiePresenter(getApplicationContext()).prepareWorkManagerForSelfie();
+
+                bmp.recycle();
+                bmp = null;
+                System.gc();
+            }
+
+            mCamera = null;
+//            handler.post(new Runnable() {
+//                @Override
+//                public void run() {
+//                    Toast.makeText(getApplicationContext(), "Your Picture has been taken !", Toast.LENGTH_SHORT).show();
+//                }
+//            });
+
+            Log.d("1111", "Your Picture has been taken !");
+            stopSelf();
+        }*/
+        }
+    };
     private boolean isFrontCamRequest = false;
     private Camera.Size pictureSize;
-    SurfaceView sv;
     private SurfaceHolder sHolder;
     private WindowManager windowManager;
-    WindowManager.LayoutParams params;
-    public Intent cameraIntent;
-    SharedPreferences pref;
-    SharedPreferences.Editor editor;
-    int width = 0, height = 0;
+
+    public static Camera getCameraInstance() {
+        Camera c = null;
+        try {
+            c = Camera.open(); // attempt to get a Camera instance
+        } catch (Exception e) {
+            // Camera is not available (in use or does not exist)
+        }
+        return c; // returns null if camera is unavailable
+    }
+
+    public static Bitmap decodeBitmap(byte[] data) {
+
+        Bitmap bitmap = null;
+        BitmapFactory.Options bfOptions = new BitmapFactory.Options();
+        bfOptions.inDither = false; // Disable Dithering mode
+        bfOptions.inPurgeable = true; // Tell to gc that whether it needs free
+        // memory, the Bitmap can be cleared
+        bfOptions.inInputShareable = true; // Which kind of reference will be
+        // used to recover the Bitmap data
+        // after being clear, when it will
+        // be used in the future
+        bfOptions.inTempStorage = new byte[32 * 1024];
+
+        if (data != null)
+            bitmap = BitmapFactory.decodeByteArray(data, 0, data.length,
+                    bfOptions);
+
+        return bitmap;
+    }
 
     /**
      * Called when the activity is first created.
@@ -114,6 +279,8 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
             }
         }
         return cam;
+
+
     }
 
     private void setBesttPictureResolution() {
@@ -186,21 +353,6 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
         }
     }
 
-    Handler handler = new Handler();
-
-    private class TakeImage extends AsyncTask<Intent, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Intent... params) {
-            takeImage(params[0]);
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-        }
-    }
-
     @SuppressLint("HandlerLeak")
     private synchronized void takeImage(Intent intent) {
 
@@ -230,6 +382,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                         try {
                             mCamera.setPreviewDisplay(sv.getHolder());
                         } catch (IOException e) {
+                            Log.e("123", e.getMessage());
                             handler.post(new Runnable() {
 
                                 @Override
@@ -490,6 +643,22 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
         windowManager.addView(sv, params);
         sHolder = sv.getHolder();
         sHolder.addCallback(this);
+        sHolder.addCallback(new SurfaceHolder.Callback() {
+            @Override
+            public void surfaceCreated(@NonNull SurfaceHolder holder) {
+
+            }
+
+            @Override
+            public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
+
+            }
+
+            @Override
+            public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
+
+            }
+        });
 
         // tells Android that this surface will have its data constantly
         // replaced
@@ -498,129 +667,9 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
         return START_STICKY;
     }
 
-    Camera.PictureCallback mCall = new Camera.PictureCallback() {
-
-        @Override
-        public void onPictureTaken(byte[] data, Camera camera) {
-            // decode the data obtained by the camera into a Bitmap
-            Log.d("ImageTakin", "Done");
-            if (bmp != null)
-                bmp.recycle();
-            System.gc();
-            bmp = decodeBitmap(data);
-
-            bmp = SharedMethods.RotateBitmap(bmp, -90);
-
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            if (bmp != null && QUALITY_MODE == 0)
-                bmp.compress(Bitmap.CompressFormat.JPEG, 50, bytes);
-            else if (bmp != null && QUALITY_MODE != 0)
-                bmp.compress(Bitmap.CompressFormat.JPEG, QUALITY_MODE, bytes);
-
-            File imagesFolder = new File(Environment.getExternalStorageDirectory(), AppData.folder_name);
-            if (!imagesFolder.exists()){
-                imagesFolder.mkdirs(); // <----
-            }
-
-
-            File image = new File(imagesFolder, System.currentTimeMillis() + ".jpg");
-
-            //File image = new File(imagesFolder, "intruder.jpg");
-
-            // write the bytes in file
-            try {
-                fo = new FileOutputStream(image);
-            } catch (FileNotFoundException e) {
-                Log.e("TAG", "FileNotFoundException", e);
-                // TODO Auto-generated catch block
-            }
-            try {
-                fo.write(bytes.toByteArray());
-            } catch (IOException e) {
-                Log.e("TAG", "fo.write::PictureTaken", e);
-                // TODO Auto-generated catch block
-            }
-
-            // remember close de FileOutput
-            try {
-                fo.close();
-                if (Build.VERSION.SDK_INT < 19)
-                    sendBroadcast(new Intent(
-                            Intent.ACTION_MEDIA_MOUNTED,
-                            Uri.parse("file://" + Environment.getExternalStorageDirectory())));
-                else {
-                    MediaScannerConnection
-                            .scanFile(
-                                    getApplicationContext(),
-                                    new String[]{image.toString()},
-                                    null,
-                                    new MediaScannerConnection.OnScanCompletedListener() {
-                                        public void onScanCompleted(String path, Uri uri) {
-                                            Log.i("ExternalStorage", "Scanned " + path + ":");
-                                            Log.i("ExternalStorage", "-> uri=" + uri);
-                                        }
-                                    });
-                }
-
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            if (mCamera != null) {
-                mCamera.stopPreview();
-                mCamera.release();
-                mCamera = null;
-            }
-            /*
-             * Toast.makeText(getApplicationContext(),
-             * "Your Picture has been taken !", Toast.LENGTH_LONG).show();
-             */
-            Log.d("Camera", "Image Taken !");
-//            if (bmp != null) {
-//                bmp.recycle();
-//                bmp = null;
-//                System.gc();
-//            }
-
-            if (bmp != null) {
-                // SEND INTRUDER LOCATION AND IMAGE TO ADMIN
-                String image_str = SharedMethods.convertToString(bmp);
-                if (image_str != null)
-               //     new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie(image_str);
-                    new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie2(image_str, image);
-                //new IntruderSelfiePresenter(getApplicationContext()).prepareWorkManagerForSelfie();
-
-                bmp.recycle();
-                bmp = null;
-                System.gc();
-            }
-
-            mCamera = null;
-//            handler.post(new Runnable() {
-//                @Override
-//                public void run() {
-//                    Toast.makeText(getApplicationContext(), "Your Picture has been taken !", Toast.LENGTH_SHORT).show();
-//                }
-//            });
-
-            Log.d("1111", "Your Picture has been taken !");
-            stopSelf();
-        }
-    };
-
     @Override
     public IBinder onBind(Intent intent) {
         return null;
-    }
-
-    public static Camera getCameraInstance() {
-        Camera c = null;
-        try {
-            c = Camera.open(); // attempt to get a Camera instance
-        } catch (Exception e) {
-            // Camera is not available (in use or does not exist)
-        }
-        return c; // returns null if camera is unavailable
     }
 
     @Override
@@ -663,24 +712,81 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
         }
     }
 
-    public static Bitmap decodeBitmap(byte[] data) {
+    private class TakeImage extends AsyncTask<Intent, Void, Void> {
 
-        Bitmap bitmap = null;
-        BitmapFactory.Options bfOptions = new BitmapFactory.Options();
-        bfOptions.inDither = false; // Disable Dithering mode
-        bfOptions.inPurgeable = true; // Tell to gc that whether it needs free
-        // memory, the Bitmap can be cleared
-        bfOptions.inInputShareable = true; // Which kind of reference will be
-        // used to recover the Bitmap data
-        // after being clear, when it will
-        // be used in the future
-        bfOptions.inTempStorage = new byte[32 * 1024];
+        @Override
+        protected Void doInBackground(Intent... params) {
+            //takeImage(params[0]);
+            takeImage(params[0]);
+            return null;
+        }
 
-        if (data != null)
-            bitmap = BitmapFactory.decodeByteArray(data, 0, data.length,
-                    bfOptions);
-
-        return bitmap;
+        @Override
+        protected void onPostExecute(Void result) {
+        }
     }
 
 }
+
+/*
+2021-08-11 00:29:22.425 309-309/com.app.theshineindia E/AndroidRuntime: FATAL EXCEPTION: main
+    Process: com.app.theshineindia, PID: 309
+    java.lang.RuntimeException: Unable to start receiver com.app.theshineindia.intruder_selfie.AdminReceiver: java.lang.IllegalArgumentException: Parameter specified as non-null is null: method kotlin.jvm.internal.Intrinsics.checkParameterIsNotNull, parameter baseFileDirectory
+        at android.app.ActivityThread.handleReceiver(ActivityThread.java:4452)
+        at android.app.ActivityThread.access$1500(ActivityThread.java:301)
+        at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2159)
+        at android.os.Handler.dispatchMessage(Handler.java:106)
+        at android.os.Looper.loop(Looper.java:246)
+        at android.app.ActivityThread.main(ActivityThread.java:8512)
+        at java.lang.reflect.Method.invoke(Native Method)
+        at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:602)
+        at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1130)
+     Caused by: java.lang.IllegalArgumentException: Parameter specified as non-null is null: method kotlin.jvm.internal.Intrinsics.checkParameterIsNotNull, parameter baseFileDirectory
+        at com.cottacush.android.hiddencam.HiddenCam.<init>(Unknown Source:7)
+        at com.cottacush.android.hiddencam.HiddenCam.<init>(HiddenCam.kt:33)
+        at com.cottacush.android.hiddencam.HiddenCam.<init>(Unknown Source:12)
+        at com.app.theshineindia.intruder_selfie.HiddenCamera.initializeCamera(HiddenCamera.java:35)
+        at com.app.theshineindia.intruder_selfie.AdminReceiver.onPasswordFailed(AdminReceiver.java:53)
+        at android.app.admin.DeviceAdminReceiver.onPasswordFailed(DeviceAdminReceiver.java:657)
+        at android.app.admin.DeviceAdminReceiver.onReceive(DeviceAdminReceiver.java:1062)
+        at android.app.ActivityThread.handleReceiver(ActivityThread.java:4443)
+        at android.app.ActivityThread.access$1500(ActivityThread.java:301) 
+        at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2159) 
+        at android.os.Handler.dispatchMessage(Handler.java:106) 
+        at android.os.Looper.loop(Looper.java:246) 
+        at android.app.ActivityThread.main(ActivityThread.java:8512) 
+        at java.lang.reflect.Method.invoke(Native Method) 
+        at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:602) 
+        at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1130) 
+ */
+/*
+
+2021-08-11 00:29:22.425 309-309/com.app.theshineindia E/AndroidRuntime: FATAL EXCEPTION: main
+        Process: com.app.theshineindia, PID: 309
+        java.lang.RuntimeException: Unable to start receiver com.app.theshineindia.intruder_selfie.AdminReceiver: java.lang.IllegalArgumentException: Parameter specified as non-null is null: method kotlin.jvm.internal.Intrinsics.checkParameterIsNotNull, parameter baseFileDirectory
+        at android.app.ActivityThread.handleReceiver(ActivityThread.java:4452)
+        at android.app.ActivityThread.access$1500(ActivityThread.java:301)
+        at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2159)
+        at android.os.Handler.dispatchMessage(Handler.java:106)
+        at android.os.Looper.loop(Looper.java:246)
+        at android.app.ActivityThread.main(ActivityThread.java:8512)
+        at java.lang.reflect.Method.invoke(Native Method)
+        at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:602)
+        at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1130)
+        Caused by: java.lang.IllegalArgumentException: Parameter specified as non-null is null: method kotlin.jvm.internal.Intrinsics.checkParameterIsNotNull, parameter baseFileDirectory
+        at com.cottacush.android.hiddencam.HiddenCam.<init>(Unknown Source:7)
+        at com.cottacush.android.hiddencam.HiddenCam.<init>(HiddenCam.kt:33)
+        at com.cottacush.android.hiddencam.HiddenCam.<init>(Unknown Source:12)
+        at com.app.theshineindia.intruder_selfie.HiddenCamera.initializeCamera(HiddenCamera.java:35)
+        at com.app.theshineindia.intruder_selfie.AdminReceiver.onPasswordFailed(AdminReceiver.java:53)
+        at android.app.admin.DeviceAdminReceiver.onPasswordFailed(DeviceAdminReceiver.java:657)
+        at android.app.admin.DeviceAdminReceiver.onReceive(DeviceAdminReceiver.java:1062)
+        at android.app.ActivityThread.handleReceiver(ActivityThread.java:4443)
+        at android.app.ActivityThread.access$1500(ActivityThread.java:301) 
+        at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2159) 
+        at android.os.Handler.dispatchMessage(Handler.java:106) 
+        at android.os.Looper.loop(Looper.java:246) 
+        at android.app.ActivityThread.main(ActivityThread.java:8512) 
+        at java.lang.reflect.Method.invoke(Native Method) 
+        at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:602) 
+        at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1130) */

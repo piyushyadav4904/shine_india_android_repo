@@ -43,7 +43,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
-        tools:ignore="GoogleAppIndexingWarning">
+        tools:ignore="GoogleAppIndexingWarning"
+        android:hardwareAccelerated="true">
 
         <activity android:name=".location.LocationTestActivity"></activity>
         <activity android:name=".location.GeoLocationActivity" />
@@ -241,10 +242,12 @@
         <service android:name=".app_locker.services.LockService" />
         <service
             android:name=".intruder_selfie.CameraService"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="camera"/>
         <service
             android:name=".intruder_selfie.CameraService2"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="camera"/>
 
         <receiver android:name=".app_locker.receiver.BootBroadcastReceiver">
             <intent-filter>
