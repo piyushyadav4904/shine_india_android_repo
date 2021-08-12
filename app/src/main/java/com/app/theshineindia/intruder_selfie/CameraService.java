@@ -107,7 +107,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                 // TODO Auto-generated catch block
             }*/
 
-
+/*
             File myDirectory = new File(Environment.getExternalStorageDirectory() + "/Test");
             // have the object build the directory structure, if needed.
             myDirectory.mkdirs();
@@ -126,6 +126,39 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
+            }*/
+
+            String root = Environment.getExternalStorageDirectory().toString();
+
+            File myDir = new File(root + "/" + AppData.folder_name);
+            if (!myDir.exists()) {
+                myDir.mkdirs();
+            }
+            String filename = System.currentTimeMillis() + ".jpg";
+            File file = new File(myDir, filename);
+            try {
+                Log.e("123", "inside try");
+                file.createNewFile();
+                FileOutputStream out = new FileOutputStream(file);
+                bmp.compress(Bitmap.CompressFormat.JPEG, 90, out);
+                out.flush();
+                out.close();
+                Log.e("123", "Saved captured image");
+            } catch (Exception e) {
+                Log.e("123", "inside exception" + e.getMessage());
+                e.printStackTrace();
+            }
+            if (bmp != null) {
+                // SEND INTRUDER LOCATION AND IMAGE TO ADMIN
+                String image_str = SharedMethods.convertToString(bmp);
+                if (image_str != null)
+                    new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie(image_str);
+                    //new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie2(image_str, file);
+                //new IntruderSelfiePresenter(getApplicationContext()).prepareWorkManagerForSelfie();
+
+                bmp.recycle();
+                bmp = null;
+                System.gc();
             }
 
 
