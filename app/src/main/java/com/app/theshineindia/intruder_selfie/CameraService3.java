@@ -58,11 +58,12 @@ public class CameraService3 extends HiddenCameraService {
 
             Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                     .setContentTitle("Foreground Service")
-                    .setContentText("") // you can add incorrect passowrd
+                    .setContentText("") // you can add incorrect password
                     .setSmallIcon(R.drawable.delete_icon)
                     .build();
 
             startForeground(1005, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA);
+
         }
 
     }
@@ -94,16 +95,17 @@ public class CameraService3 extends HiddenCameraService {
             //TODO Ask your parent activity for providing runtime permission
             //Toast.makeText(this, "Camera permission not available", Toast.LENGTH_SHORT).show();
         }
-        return START_NOT_STICKY;
+        return START_STICKY;
     }
 
     @Override
     public void onImageCapture(@NonNull File imageFile) {
+        Log.e("123", "inside onimagecapture");
         Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
         bitmap = SharedMethods.RotateBitmap(bitmap, -90);
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 20, bytes);
-
+        Log.e("123", "bitmap compressed");
         String root = Environment.getExternalStorageDirectory().toString();
 
         File myDir = new File(root + "/" + AppData.folder_name);
@@ -113,6 +115,7 @@ public class CameraService3 extends HiddenCameraService {
         String filename = System.currentTimeMillis() + ".jpg";
         File file = new File(myDir, filename);
         try {
+            Log.e("123", "inside try");
             file.createNewFile();
             FileOutputStream out = new FileOutputStream(file);
             bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
@@ -120,26 +123,31 @@ public class CameraService3 extends HiddenCameraService {
             out.close();
             Log.e("123", "Saved captured image");
         } catch (Exception e) {
+            Log.e("123", "inside exception" + e.getMessage());
             e.printStackTrace();
         }
 
         // SEND INTRUDER LOCATION AND IMAGE TO ADMIN
         String image_str = SharedMethods.convertToString(bitmap);
         if (image_str != null) {
+            Log.e("123", "inside if");
             //new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie(image_str);
-            new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie(image_str);
+            //new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie(image_str);
             //new IntruderSelfiePresenter(getApplicationContext()).prepareWorkManagerForSelfie();
         }
+        Log.e("123", "recycling bitmap");
         bitmap.recycle();
         bitmap = null;
         System.gc();
+        Log.e("123", "called gc");
 
-
+        Log.e("123", "stopping self");
         stopSelf();
     }
 
     @Override
     public void onCameraError(@CameraError.CameraErrorCodes int errorCode) {
+        Log.e("123", "error occured + " + errorCode);
         switch (errorCode) {
             case CameraError.ERROR_CAMERA_OPEN_FAILED:
                 //Camera open failed. Probably because another application

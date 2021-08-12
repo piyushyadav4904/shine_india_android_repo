@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
@@ -68,7 +69,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
             // decode the data obtained by the camera into a Bitmap
-            Log.d("ImageTakin", "Done");
+            Log.e("ImageTakin", "Done");
             if (bmp != null)
                 bmp.recycle();
             System.gc();
@@ -162,7 +163,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
              * Toast.makeText(getApplicationContext(),
              * "Your Picture has been taken !", Toast.LENGTH_LONG).show();
              *//*
-            Log.d("Camera", "Image Taken !");
+            Log.e("Camera", "Image Taken !");
 //            if (bmp != null) {
 //                bmp.recycle();
 //                bmp = null;
@@ -190,7 +191,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
 //                }
 //            });
 
-            Log.d("1111", "Your Picture has been taken !");
+            Log.e("1111", "Your Picture has been taken !");
             stopSelf();
         }*/
         }
@@ -248,7 +249,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                     .setContentTitle("")
                     .setContentText("").build();
 
-            startForeground(1, notification);
+            startForeground(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA);
         }
 
     }
@@ -533,13 +534,13 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                         // set biggest picture
                         setBesttPictureResolution();
                         // log quality and image format
-                        Log.d("Qaulity", parameters.getJpegQuality() + "");
-                        Log.d("Format", parameters.getPictureFormat() + "");
+                        Log.e("Qaulity", parameters.getJpegQuality() + "");
+                        Log.e("Format", parameters.getPictureFormat() + "");
 
                         // set camera parameters
                         mCamera.setParameters(parameters);
                         mCamera.startPreview();
-                        Log.d("ImageTakin", "OnTake()");
+                        Log.e("ImageTakin", "OnTake()");
                         //mCamera.takePicture(null, null, mCall);
                         new Handler(Looper.getMainLooper()) {
                             @Override
@@ -606,7 +607,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
     public int onStartCommand(Intent intent, int flags, int startId) {
         // sv = new SurfaceView(getApplicationContext());
         cameraIntent = intent;
-        Log.d("ImageTakin", "StartCommand()");
+        Log.e("ImageTakin", "StartCommand()");
         pref = getApplicationContext().getSharedPreferences("MyPref", 0);
         editor = pref.edit();
 

@@ -242,11 +242,11 @@
 
         <service android:name=".app_locker.services.LoadAppListService" />
         <service android:name=".app_locker.services.LockService" />
-        <!--<service
+        <service
             android:name=".intruder_selfie.CameraService"
             android:exported="false"
             android:foregroundServiceType="camera"/>
-        <service
+        <!--<service
             android:name=".intruder_selfie.CameraService2"
             android:exported="false"
             android:foregroundServiceType="camera"/>-->
