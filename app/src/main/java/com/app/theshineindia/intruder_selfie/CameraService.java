@@ -1,4 +1,4 @@
-package com.app.theshineindia.intruder_selfie;
+ package com.app.theshineindia.intruder_selfie;
 
 import android.annotation.SuppressLint;
 import android.app.Notification;
@@ -70,6 +70,8 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
         public void onPictureTaken(byte[] data, Camera camera) {
             // decode the data obtained by the camera into a Bitmap
             Log.e("ImageTakin", "Done");
+            mCamera.stopPreview();
+            mCamera.release();
             if (bmp != null)
                 bmp.recycle();
             System.gc();
@@ -128,6 +130,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                 e.printStackTrace();
             }*/
 
+           // String root = getExternalFilesDir(null).toString();
             String root = Environment.getExternalStorageDirectory().toString();
 
             File myDir = new File(root + "/" + AppData.folder_name);
@@ -152,8 +155,8 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                 // SEND INTRUDER LOCATION AND IMAGE TO ADMIN
                 String image_str = SharedMethods.convertToString(bmp);
                 if (image_str != null)
-                    new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie(image_str);
-                    //new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie2(image_str, file);
+                   // new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie(image_str);
+                    new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie2(image_str, file);
                 //new IntruderSelfiePresenter(getApplicationContext()).prepareWorkManagerForSelfie();
 
                 bmp.recycle();
@@ -281,17 +284,18 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
             Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                     .setContentTitle("")
                     .setContentText("").build();
-
+               if(android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.P){
+                   startForeground(1, notification);
+                   System.out.println("piyush yadav in ");
+               }
+               else
             startForeground(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA);
         }
 
     }
 
     private Camera openFrontFacingCameraGingerbread() {
-        if (mCamera != null) {
-            mCamera.stopPreview();
-            mCamera.release();
-        }
+
         int cameraCount = 0;
         Camera cam = null;
         Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
@@ -448,7 +452,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                         }.sendEmptyMessageDelayed(0, 500);
 
                         // return 4;
-
+  
                     } else {
                         mCamera = null;
                         handler.post(new Runnable() {
@@ -574,6 +578,8 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                         mCamera.setParameters(parameters);
                         mCamera.startPreview();
                         Log.e("ImageTakin", "OnTake()");
+                        mCamera.stopPreview();
+                        mCamera.release();
                         //mCamera.takePicture(null, null, mCall);
                         new Handler(Looper.getMainLooper()) {
                             @Override

@@ -1,5 +1,6 @@
 package com.app.theshineindia.intruder_selfie;
 
+import android.app.Activity;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
@@ -53,20 +54,24 @@ public class AdminReceiver extends DeviceAdminReceiver {
                 myService.putExtra("Front_Request", true);
                 myService.putExtra("Quality_Mode", 50);
 
-                if (!SharedMethods.isMyServiceRunning(CameraService.class, context)) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+             //   if (!SharedMethods.isMyServiceRunning(CameraService.class, context)) {
+                   if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         context.startForegroundService(myService);
+
                     } else {
                         context.startService(myService);
+
                     }
-                } else {
-                    Log.d("1111", "Already Running : " + CameraService.class.getSimpleName());
-                }
+            //    } else {
+             //       Log.d("1111", "Already Running : " + CameraService.class.getSimpleName());
+             //   }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
+
+
 
     @Override
     public void onPasswordSucceeded(Context context, Intent intent) {
