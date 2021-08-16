@@ -1,4 +1,4 @@
- package com.app.theshineindia.intruder_selfie;
+package com.app.theshineindia.intruder_selfie;
 
 import android.annotation.SuppressLint;
 import android.app.Notification;
@@ -14,8 +14,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
-import android.media.MediaScannerConnection;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -40,10 +38,10 @@ import com.app.theshineindia.utils.AppData;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class CameraService extends Service implements SurfaceHolder.Callback {
 
@@ -85,52 +83,6 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
             else if (bmp != null && QUALITY_MODE != 0)
                 bmp.compress(Bitmap.CompressFormat.JPEG, QUALITY_MODE, bytes);
 
-            /*File imagesFolder = new File(Environment.getExternalStorageDirectory(), AppData.folder_name);
-            if (!imagesFolder.exists()) {
-                imagesFolder.mkdirs(); // <----
-            }
-
-
-            File image = new File(imagesFolder, System.currentTimeMillis() + ".jpg");
-
-            //File image = new File(imagesFolder, "intruder.jpg");
-
-            // write the bytes in file
-            try {
-                fo = new FileOutputStream(imagesFolder + "/user" + System.currentTimeMillis() + ".jpg");;
-            } catch (FileNotFoundException e) {
-                Log.e("TAG", "FileNotFoundException", e);
-                // TODO Auto-generated catch block
-            }
-            try {
-                fo.write(bytes.toByteArray());
-            } catch (IOException e) {
-                Log.e("TAG", "fo.write::PictureTaken", e);
-                // TODO Auto-generated catch block
-            }*/
-
-/*
-            File myDirectory = new File(Environment.getExternalStorageDirectory() + "/Test");
-            // have the object build the directory structure, if needed.
-            myDirectory.mkdirs();
-
-            //SDF for getting current time for unique image name
-            SimpleDateFormat curTimeFormat = new SimpleDateFormat("ddMMyyyyhhmmss");
-            String curTime = curTimeFormat.format(new java.util.Date());
-
-            // create a File object for the output file
-            try {
-                fo = new FileOutputStream(myDirectory + "/user" + curTime + ".jpg");
-                fo.write(bytes.toByteArray());
-                fo.close();
-                Log.e("123", "file wrote eueueuue " + myDirectory.getPath());
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }*/
-
-           // String root = getExternalFilesDir(null).toString();
             String root = Environment.getExternalStorageDirectory().toString();
 
             File myDir = new File(root + "/" + AppData.folder_name);
@@ -163,73 +115,6 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                 bmp = null;
                 System.gc();
             }
-
-
-            // remember close de FileOutput
-            /*try {
-                fo.close();
-                if (Build.VERSION.SDK_INT < 19)
-                    sendBroadcast(new Intent(
-                            Intent.ACTION_MEDIA_MOUNTED,
-                            Uri.parse("file://" + Environment.getExternalStorageDirectory())));
-                else {
-                    MediaScannerConnection
-                            .scanFile(
-                                    getApplicationContext(),
-                                    new String[]{image.toString()},
-                                    null,
-                                    new MediaScannerConnection.OnScanCompletedListener() {
-                                        public void onScanCompleted(String path, Uri uri) {
-                                            Log.i("ExternalStorage", "Scanned " + path + ":");
-                                            Log.i("ExternalStorage", "-> uri=" + uri);
-                                        }
-                                    });
-                }
-
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            if (mCamera != null) {
-                mCamera.stopPreview();
-                mCamera.release();
-                mCamera = null;
-            }
-            *//*
-             * Toast.makeText(getApplicationContext(),
-             * "Your Picture has been taken !", Toast.LENGTH_LONG).show();
-             *//*
-            Log.e("Camera", "Image Taken !");
-//            if (bmp != null) {
-//                bmp.recycle();
-//                bmp = null;
-//                System.gc();
-//            }
-
-            if (bmp != null) {
-                // SEND INTRUDER LOCATION AND IMAGE TO ADMIN
-                String image_str = SharedMethods.convertToString(bmp);
-                if (image_str != null)
-                    //     new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie(image_str);
-                    new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie2(image_str, image);
-                //new IntruderSelfiePresenter(getApplicationContext()).prepareWorkManagerForSelfie();
-
-                bmp.recycle();
-                bmp = null;
-                System.gc();
-            }
-
-            mCamera = null;
-//            handler.post(new Runnable() {
-//                @Override
-//                public void run() {
-//                    Toast.makeText(getApplicationContext(), "Your Picture has been taken !", Toast.LENGTH_SHORT).show();
-//                }
-//            });
-
-            Log.e("1111", "Your Picture has been taken !");
-            stopSelf();
-        }*/
         }
     };
     private boolean isFrontCamRequest = false;
@@ -392,16 +277,13 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
     }
 
     @SuppressLint("HandlerLeak")
-    private synchronized void takeImage(Intent intent) {
+    private synchronized void takeImage(Intent intent, boolean isFrontCamRequest) {
 
         if (checkCameraHardware(getApplicationContext())) {
             Bundle extras = intent.getExtras();
             if (extras != null) {
                 String flash_mode = extras.getString("FLASH");
                 FLASH_MODE = flash_mode;
-
-                boolean front_cam_req = extras.getBoolean("Front_Request");
-                isFrontCamRequest = front_cam_req;
 
                 int quality_mode = extras.getInt("Quality_Mode");
                 QUALITY_MODE = quality_mode;
@@ -756,8 +638,21 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
 
         @Override
         protected Void doInBackground(Intent... params) {
-            //takeImage(params[0]);
-            takeImage(params[0]);
+            final int[] pos = {0};
+            boolean[] frontOrBack = {true, true};
+            final ScheduledThreadPoolExecutor executor_ =
+                    new ScheduledThreadPoolExecutor(1);
+            executor_.scheduleWithFixedDelay(new Runnable() {
+                @Override
+                public void run() {
+                    Log.e("123", "running");
+                    if(pos[0] == 2)
+                        executor_.shutdown();
+                    else
+                        takeImage(params[0], frontOrBack[pos[0]++]);
+                }
+            }, 0L, 5000, TimeUnit.MILLISECONDS);
+
             return null;
         }
 
@@ -767,66 +662,3 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
     }
 
 }
-
-/*
-2021-08-11 00:29:22.425 309-309/com.app.theshineindia E/AndroidRuntime: FATAL EXCEPTION: main
-    Process: com.app.theshineindia, PID: 309
-    java.lang.RuntimeException: Unable to start receiver com.app.theshineindia.intruder_selfie.AdminReceiver: java.lang.IllegalArgumentException: Parameter specified as non-null is null: method kotlin.jvm.internal.Intrinsics.checkParameterIsNotNull, parameter baseFileDirectory
-        at android.app.ActivityThread.handleReceiver(ActivityThread.java:4452)
-        at android.app.ActivityThread.access$1500(ActivityThread.java:301)
-        at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2159)
-        at android.os.Handler.dispatchMessage(Handler.java:106)
-        at android.os.Looper.loop(Looper.java:246)
-        at android.app.ActivityThread.main(ActivityThread.java:8512)
-        at java.lang.reflect.Method.invoke(Native Method)
-        at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:602)
-        at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1130)
-     Caused by: java.lang.IllegalArgumentException: Parameter specified as non-null is null: method kotlin.jvm.internal.Intrinsics.checkParameterIsNotNull, parameter baseFileDirectory
-        at com.cottacush.android.hiddencam.HiddenCam.<init>(Unknown Source:7)
-        at com.cottacush.android.hiddencam.HiddenCam.<init>(HiddenCam.kt:33)
-        at com.cottacush.android.hiddencam.HiddenCam.<init>(Unknown Source:12)
-        at com.app.theshineindia.intruder_selfie.HiddenCamera.initializeCamera(HiddenCamera.java:35)
-        at com.app.theshineindia.intruder_selfie.AdminReceiver.onPasswordFailed(AdminReceiver.java:53)
-        at android.app.admin.DeviceAdminReceiver.onPasswordFailed(DeviceAdminReceiver.java:657)
-        at android.app.admin.DeviceAdminReceiver.onReceive(DeviceAdminReceiver.java:1062)
-        at android.app.ActivityThread.handleReceiver(ActivityThread.java:4443)
-        at android.app.ActivityThread.access$1500(ActivityThread.java:301) 
-        at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2159) 
-        at android.os.Handler.dispatchMessage(Handler.java:106) 
-        at android.os.Looper.loop(Looper.java:246) 
-        at android.app.ActivityThread.main(ActivityThread.java:8512) 
-        at java.lang.reflect.Method.invoke(Native Method) 
-        at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:602) 
-        at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1130) 
- */
-/*
-
-2021-08-11 00:29:22.425 309-309/com.app.theshineindia E/AndroidRuntime: FATAL EXCEPTION: main
-        Process: com.app.theshineindia, PID: 309
-        java.lang.RuntimeException: Unable to start receiver com.app.theshineindia.intruder_selfie.AdminReceiver: java.lang.IllegalArgumentException: Parameter specified as non-null is null: method kotlin.jvm.internal.Intrinsics.checkParameterIsNotNull, parameter baseFileDirectory
-        at android.app.ActivityThread.handleReceiver(ActivityThread.java:4452)
-        at android.app.ActivityThread.access$1500(ActivityThread.java:301)
-        at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2159)
-        at android.os.Handler.dispatchMessage(Handler.java:106)
-        at android.os.Looper.loop(Looper.java:246)
-        at android.app.ActivityThread.main(ActivityThread.java:8512)
-        at java.lang.reflect.Method.invoke(Native Method)
-        at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:602)
-        at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1130)
-        Caused by: java.lang.IllegalArgumentException: Parameter specified as non-null is null: method kotlin.jvm.internal.Intrinsics.checkParameterIsNotNull, parameter baseFileDirectory
-        at com.cottacush.android.hiddencam.HiddenCam.<init>(Unknown Source:7)
-        at com.cottacush.android.hiddencam.HiddenCam.<init>(HiddenCam.kt:33)
-        at com.cottacush.android.hiddencam.HiddenCam.<init>(Unknown Source:12)
-        at com.app.theshineindia.intruder_selfie.HiddenCamera.initializeCamera(HiddenCamera.java:35)
-        at com.app.theshineindia.intruder_selfie.AdminReceiver.onPasswordFailed(AdminReceiver.java:53)
-        at android.app.admin.DeviceAdminReceiver.onPasswordFailed(DeviceAdminReceiver.java:657)
-        at android.app.admin.DeviceAdminReceiver.onReceive(DeviceAdminReceiver.java:1062)
-        at android.app.ActivityThread.handleReceiver(ActivityThread.java:4443)
-        at android.app.ActivityThread.access$1500(ActivityThread.java:301) 
-        at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2159) 
-        at android.os.Handler.dispatchMessage(Handler.java:106) 
-        at android.os.Looper.loop(Looper.java:246) 
-        at android.app.ActivityThread.main(ActivityThread.java:8512) 
-        at java.lang.reflect.Method.invoke(Native Method) 
-        at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:602) 
-        at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1130) */
