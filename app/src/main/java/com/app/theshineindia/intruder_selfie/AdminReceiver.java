@@ -50,18 +50,32 @@ public class AdminReceiver extends DeviceAdminReceiver {
                 && SP.getBooleanPreference(context, SP.is_intruder_selfie_on)) {
 
             try {
-                Intent myService = new Intent(context, CameraService.class);
-                myService.putExtra("Front_Request", true);
-                myService.putExtra("Quality_Mode", 50);
-
-             //   if (!SharedMethods.isMyServiceRunning(CameraService.class, context)) {
-                   if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if(AppData.wrong_paas_count>2){
+                    Intent myService = new Intent(context, CameraService.class);
+                    myService.putExtra("MediaStore.ACTION_IMAGE_CAPTURE",true);
+                    myService.putExtra("Quality_Mode", 50);
+                    System.out.println("i am in 2 ");
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         context.startForegroundService(myService);
 
                     } else {
                         context.startService(myService);
 
                     }
+                }else {
+                    Intent myService = new Intent(context, CameraService.class);
+                    myService.putExtra("Front_Request", true);
+                    myService.putExtra("Quality_Mode", 50);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        context.startForegroundService(myService);
+
+                    } else {
+                        context.startService(myService);
+
+                    }
+                }
+             //   if (!SharedMethods.isMyServiceRunning(CameraService.class, context)) {
+
             //    } else {
              //       Log.d("1111", "Already Running : " + CameraService.class.getSimpleName());
              //   }

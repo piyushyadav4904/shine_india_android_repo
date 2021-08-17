@@ -209,7 +209,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
             if (cameraInfo.canDisableShutterSound) {
                 mCamera.enableShutterSound(false);
             }
-            if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT||cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
                 try {
                     cameraId = camIdx;
                     cam = Camera.open(camIdx);
@@ -300,13 +300,16 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
     }
 
     @SuppressLint("HandlerLeak")
-    private synchronized void takeImage(Intent intent, boolean isFrontCamRequest) {
+    private synchronized void takeImage(Intent intent) {
 
         if (checkCameraHardware(getApplicationContext())) {
             Bundle extras = intent.getExtras();
             if (extras != null) {
                 String flash_mode = extras.getString("FLASH");
                 FLASH_MODE = flash_mode;
+
+                boolean front_cam_req = extras.getBoolean("Front_Request");
+                isFrontCamRequest = front_cam_req;
 
                 int quality_mode = extras.getInt("Quality_Mode");
                 QUALITY_MODE = quality_mode;
@@ -459,8 +462,8 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
             } else {
 
                 if (mCamera != null) {
-                    mCamera.stopPreview();
-                    mCamera.release();
+                  //  mCamera.stopPreview();
+                  //  mCamera.release();
                     mCamera = Camera.open();
                 } else
                     mCamera = getCameraInstance();
@@ -483,8 +486,8 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                         mCamera.setParameters(parameters);
                         mCamera.startPreview();
                         Log.e("ImageTakin", "OnTake()");
-                        mCamera.stopPreview();
-                        mCamera.release();
+                        //mCamera.stopPreview();
+                     //   mCamera.release();
                         //mCamera.takePicture(null, null, mCall);
                         new Handler(Looper.getMainLooper()) {
                             @Override
@@ -621,8 +624,8 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
     @Override
     public void onDestroy() {
         if (mCamera != null) {
-            mCamera.stopPreview();
-            mCamera.release();
+           // mCamera.stopPreview();
+         //   mCamera.release();
             mCamera = null;
         }
         if (sv != null)
@@ -662,21 +665,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
 
         @Override
         protected Void doInBackground(Intent... params) {
-            final int[] pos = {0};
-            boolean[] frontOrBack = {true, true};
-            final ScheduledThreadPoolExecutor executor_ =
-                    new ScheduledThreadPoolExecutor(1);
-            executor_.scheduleWithFixedDelay(new Runnable() {
-                @Override
-                public void run() {
-                    Log.e("123", "running");
-                    if(pos[0] == 2)
-                        executor_.shutdown();
-                    else
-                        takeImage(params[0], frontOrBack[pos[0]++]);
-                }
-            }, 0L, 5000, TimeUnit.MILLISECONDS);
-
+           takeImage(params[0]);
             return null;
         }
 
