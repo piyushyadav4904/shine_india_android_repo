@@ -14,6 +14,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
+import android.hardware.camera2.CameraManager;
+import android.media.AudioManager;
+import android.media.MediaActionSound;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -60,8 +63,24 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
     // the camera parameters
     private Camera.Parameters parameters;
     private Bitmap bmp;
+    private  int cameraId;
     private String FLASH_MODE;
     private int QUALITY_MODE = 0;
+    Camera.ShutterCallback shutter = new Camera.ShutterCallback() {
+        @Override
+        public void onShutter() {
+
+             Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+            Camera.getCameraInfo(cameraId, cameraInfo);
+            if (!cameraInfo.canDisableShutterSound) {
+                AudioManager manager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+                manager.setStreamVolume(AudioManager.STREAM_SYSTEM, 0, AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE);
+             //   mCamera.enableShutterSound(true);
+                System.out.println("you are in");
+            }
+        }
+    };
+
     Camera.PictureCallback mCall = new Camera.PictureCallback() {
 
         @Override
@@ -187,8 +206,12 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
         cameraCount = Camera.getNumberOfCameras();
         for (int camIdx = 0; camIdx < cameraCount; camIdx++) {
             Camera.getCameraInfo(camIdx, cameraInfo);
+            if (cameraInfo.canDisableShutterSound) {
+                mCamera.enableShutterSound(false);
+            }
             if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
                 try {
+                    cameraId = camIdx;
                     cam = Camera.open(camIdx);
                 } catch (RuntimeException e) {
                     Log.e("Camera",
@@ -329,7 +352,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                             @Override
                             public void handleMessage(Message msg) {
                                 super.handleMessage(msg);
-                                mCamera.takePicture(null, null, mCall);
+                                mCamera.takePicture(shutter, null, mCall);
                             }
                         }.sendEmptyMessageDelayed(0, 500);
 
@@ -393,7 +416,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                                 @Override
                                 public void handleMessage(Message msg) {
                                     super.handleMessage(msg);
-                                    mCamera.takePicture(null, null, mCall);
+                                    mCamera.takePicture(shutter, null, mCall);
                                 }
                             }.sendEmptyMessageDelayed(0, 500);
                             // return 4;
@@ -467,7 +490,8 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                             @Override
                             public void handleMessage(Message msg) {
                                 super.handleMessage(msg);
-                                mCamera.takePicture(null, null, mCall);
+
+                                mCamera.takePicture(shutter, null, mCall);
                             }
                         }.sendEmptyMessageDelayed(0, 500);
 
