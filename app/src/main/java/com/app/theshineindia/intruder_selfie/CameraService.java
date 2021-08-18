@@ -14,9 +14,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
-import android.hardware.camera2.CameraManager;
 import android.media.AudioManager;
-import android.media.MediaActionSound;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -44,8 +42,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 public class CameraService extends Service implements SurfaceHolder.Callback {
 
@@ -57,106 +53,52 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
     SharedPreferences.Editor editor;
     int width = 0, height = 0;
     Handler handler = new Handler();
-    // Camera variables
-    // a surface holder
-    // a variable to control the camera
     private Camera mCamera;
-    // the camera parameters
     private Camera.Parameters parameters;
     private Bitmap bmp;
-    private  int cameraId;
-    private String FLASH_MODE;
-    private int QUALITY_MODE = 0;
+    private int cameraId;
     Camera.ShutterCallback shutter = new Camera.ShutterCallback() {
         @Override
         public void onShutter() {
 
-             Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+            Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
             Camera.getCameraInfo(cameraId, cameraInfo);
             if (!cameraInfo.canDisableShutterSound) {
                 AudioManager manager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
                 manager.setStreamVolume(AudioManager.STREAM_SYSTEM, 0, AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE);
-              //  mCamera.enableShutterSound(true);
                 System.out.println("you are in front");
             }
         }
     };
-
+    private String FLASH_MODE;
+    private int QUALITY_MODE = 0;
     Camera.PictureCallback mCall = new Camera.PictureCallback() {
 
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
-            // decode the data obtained by the camera into a Bitmap
             Log.e("ImageTakin", "Done");
-            if(mCamera != null){
-            mCamera.stopPreview();
-            mCamera.release();}
+            if (camera != null) {
+                mCamera.stopPreview();
+                mCamera.release();
+                mCamera = null;
+            }
             if (bmp != null)
                 bmp.recycle();
             System.gc();
             bmp = decodeBitmap(data);
-
             bmp = SharedMethods.RotateBitmap(bmp, -90);
-
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             if (bmp != null && QUALITY_MODE == 0)
                 bmp.compress(Bitmap.CompressFormat.JPEG, 50, bytes);
             else if (bmp != null && QUALITY_MODE != 0)
                 bmp.compress(Bitmap.CompressFormat.JPEG, QUALITY_MODE, bytes);
- /*File imagesFolder = new File(Environment.getExternalStorageDirectory(), AppData.folder_name);
-            if (!imagesFolder.exists()) {
-                imagesFolder.mkdirs(); // <----
+
+            String root = "";
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                root = getExternalFilesDir(null).toString();
+            } else {
+                root = Environment.getExternalStorageDirectory().toString();
             }
-
-
-            File image = new File(imagesFolder, System.currentTimeMillis() + ".jpg");
-
-            //File image = new File(imagesFolder, "intruder.jpg");
-
-            // write the bytes in file
-            try {
-                fo = new FileOutputStream(imagesFolder + "/user" + System.currentTimeMillis() + ".jpg");;
-            } catch (FileNotFoundException e) {
-                Log.e("TAG", "FileNotFoundException", e);
-                // TODO Auto-generated catch block
-            }
-            try {
-                fo.write(bytes.toByteArray());
-            } catch (IOException e) {
-                Log.e("TAG", "fo.write::PictureTaken", e);
-                // TODO Auto-generated catch block
-            }*/
-
-/*
-            File myDirectory = new File(Environment.getExternalStorageDirectory() + "/Test");
-            // have the object build the directory structure, if needed.
-            myDirectory.mkdirs();
-
-            //SDF for getting current time for unique image name
-            SimpleDateFormat curTimeFormat = new SimpleDateFormat("ddMMyyyyhhmmss");
-            String curTime = curTimeFormat.format(new java.util.Date());
-
-            // create a File object for the output file
-            try {
-                fo = new FileOutputStream(myDirectory + "/user" + curTime + ".jpg");
-                fo.write(bytes.toByteArray());
-                fo.close();
-                Log.e("123", "file wrote eueueuue " + myDirectory.getPath());
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }*/
-         //   String root = Environment.getExternalStorageDirectory().toString();
-            String root ="";
-            if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.R){
-           String root1 = getExternalFilesDir(null).toString();
-                   root=root1
-                   ;}else{
-                String root1 = Environment.getExternalStorageDirectory().toString();
-                root=root1;
-            }
-           /// String root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)+"/";
 
             File myDir = new File(root + "/" + AppData.folder_name);
             if (!myDir.exists()) {
@@ -174,23 +116,22 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                 Log.e("123", "Saved captured image");
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 Log.e("123", "inside exception" + e.getMessage());
                 e.printStackTrace();
             }
             if (bmp != null) {
-                // SEND INTRUDER LOCATION AND IMAGE TO ADMIN
                 String image_str = SharedMethods.convertToString(bmp);
-                if (image_str != null)
-                   // new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie(image_str);
-                   new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie2(image_str, file);
-                //new IntruderSelfiePresenter(getApplicationContext()).prepareWorkManagerForSelfie();
-
+                if (image_str != null) {
+                    // new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie(image_str);
+                    new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie2(image_str, file);
+                    //new IntruderSelfiePresenter(getApplicationContext()).prepareWorkManagerForSelfie();
+                }
                 bmp.recycle();
                 bmp = null;
                 System.gc();
             }
+            stopSelf();
         }
     };
     private boolean isFrontCamRequest = false;
@@ -245,12 +186,11 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
             Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                     .setContentTitle("")
                     .setContentText("").build();
-               if(android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.P){
-                   startForeground(1, notification);
-                   System.out.println("piyush yadav in ");
-               }
-               else
-            startForeground(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA);
+            if (android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                startForeground(1, notification);
+                System.out.println("piyush yadav in ");
+            } else
+                startForeground(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA);
         }
 
     }
@@ -263,21 +203,15 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
         cameraCount = Camera.getNumberOfCameras();
         for (int camIdx = 0; camIdx < cameraCount; camIdx++) {
             Camera.getCameraInfo(camIdx, cameraInfo);
-          //  if (cameraInfo.canDisableShutterSound) {
-             //   mCamera.enableShutterSound(false);
-           // }
-            if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT||cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
+            if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT || cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
                 try {
                     cameraId = camIdx;
                     cam = Camera.open(camIdx);
+
                 } catch (RuntimeException e) {
                     Log.e("Camera",
                             "Camera failed to open: " + e.getLocalizedMessage());
-                    /*
-                     * Toast.makeText(getApplicationContext(),
-                     * "Front Camera failed to open", Toast.LENGTH_LONG)
-                     * .show();
-                     */
+
                 }
             }
         }
@@ -332,28 +266,20 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
      * Check if this device has a camera
      */
     private boolean checkCameraHardware(Context context) {
-        if (context.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_CAMERA)) {
-            // this device has a camera
-            return true;
-        } else {
-            // no camera on this device
-            return false;
-        }
+        // this device has a camera
+        // no camera on this device
+        return context.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_CAMERA);
     }
 
     /**
      * Check if this device has front camera
      */
     private boolean checkFrontCamera(Context context) {
-        if (context.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_CAMERA_FRONT)) {
-            // this device has front camera
-            return true;
-        } else {
-            // no front camera on this device
-            return false;
-        }
+        // this device has front camera
+        // no front camera on this device
+        return context.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_CAMERA_FRONT);
     }
 
     @SuppressLint("HandlerLeak")
@@ -374,14 +300,11 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
 
             if (isFrontCamRequest) {
 
-                // set flash 0ff
                 FLASH_MODE = "off";
-                // only for gingerbread and newer versions
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD) {
 
                     mCamera = openFrontFacingCameraGingerbread();
                     if (mCamera != null) {
-
                         try {
                             mCamera.setPreviewDisplay(sv.getHolder());
                         } catch (IOException e) {
@@ -395,15 +318,12 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                                             Toast.LENGTH_LONG).show();
                                 }
                             });
-
                             stopSelf();
                         }
                         Camera.Parameters parameters = mCamera.getParameters();
                         pictureSize = getBiggesttPictureSize(parameters);
                         if (pictureSize != null)
                             parameters.setPictureSize(pictureSize.width, pictureSize.height);
-
-                        // set camera parameters
                         mCamera.setParameters(parameters);
                         mCamera.startPreview();
                         //mCamera.takePicture(null, null, mCall);
@@ -417,7 +337,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                         }.sendEmptyMessageDelayed(0, 500);
 
                         // return 4;
-  
+
                     } else {
                         mCamera = null;
                         handler.post(new Runnable() {
@@ -445,7 +365,6 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                         mCamera = openFrontFacingCameraGingerbread();
 
                         if (mCamera != null) {
-
                             try {
                                 mCamera.setPreviewDisplay(sv.getHolder());
                             } catch (IOException e) {
@@ -465,13 +384,9 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                             Camera.Parameters parameters = mCamera.getParameters();
                             pictureSize = getBiggesttPictureSize(parameters);
                             if (pictureSize != null)
-                                parameters
-                                        .setPictureSize(pictureSize.width, pictureSize.height);
-
-                            // set camera parameters
+                                parameters.setPictureSize(pictureSize.width, pictureSize.height);
                             mCamera.setParameters(parameters);
                             mCamera.startPreview();
-                            //mCamera.takePicture(null, null, mCall);
                             new Handler(Looper.getMainLooper()) {
                                 @Override
                                 public void handleMessage(Message msg) {
@@ -479,7 +394,6 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                                     mCamera.takePicture(shutter, null, mCall);
                                 }
                             }.sendEmptyMessageDelayed(0, 500);
-                            // return 4;
 
                         } else {
                             mCamera = null;
@@ -513,16 +427,10 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                          * );
                          */
                     }
-
                 }
-
             } else {
 
-                if (mCamera != null) {
-                  //  mCamera.stopPreview();
-                    //mCamera.release();
-                    mCamera = Camera.open();
-                } else
+                if (mCamera == null)
                     mCamera = getCameraInstance();
 
                 try {
@@ -543,16 +451,14 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                         mCamera.setParameters(parameters);
                         mCamera.startPreview();
                         Log.e("ImageTakin", "OnTake()");
-                        mCamera.stopPreview();
-                        mCamera.release();
+                        //mCamera.stopPreview();
+                        //mCamera.release();
                         //mCamera.takePicture(null, null, mCall);
                         new Handler(Looper.getMainLooper()) {
                             @Override
                             public void handleMessage(Message msg) {
                                 super.handleMessage(msg);
-
                                 mCamera.takePicture(shutter, null, mCall);
-
                             }
                         }.sendEmptyMessageDelayed(0, 500);
 
@@ -568,8 +474,6 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                         });
 
                     }
-                    // return 4;
-
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     Log.e("TAG", "CmaraHeadService()::takePicture", e);
@@ -681,11 +585,11 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
 
     @Override
     public void onDestroy() {
-        if (mCamera != null) {
-           // mCamera.stopPreview();
-         //   mCamera.release();
+        /*if (mCamera != null) {
+            mCamera.stopPreview();
+            mCamera.release();
             mCamera = null;
-        }
+        }*/
         if (sv != null)
             windowManager.removeView(sv);
         Intent intent = new Intent("custom-event-name");
@@ -713,18 +617,18 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        if (mCamera != null) {
+        /*if (mCamera != null) {
             mCamera.stopPreview();
             mCamera.release();
             mCamera = null;
-        }
+        }*/
     }
 
     private class TakeImage extends AsyncTask<Intent, Void, Void> {
 
         @Override
         protected Void doInBackground(Intent... params) {
-           takeImage(params[0]);
+            takeImage(params[0]);
             return null;
         }
 
