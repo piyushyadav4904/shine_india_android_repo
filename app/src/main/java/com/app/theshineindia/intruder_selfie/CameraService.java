@@ -206,9 +206,9 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
         cameraCount = Camera.getNumberOfCameras();
         for (int camIdx = 0; camIdx < cameraCount; camIdx++) {
             Camera.getCameraInfo(camIdx, cameraInfo);
-            if (cameraInfo.canDisableShutterSound) {
-                mCamera.enableShutterSound(false);
-            }
+          //  if (cameraInfo.canDisableShutterSound) {
+             //   mCamera.enableShutterSound(false);
+           // }
             if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT||cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
                 try {
                     cameraId = camIdx;
@@ -462,8 +462,8 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
             } else {
 
                 if (mCamera != null) {
-                  //  mCamera.stopPreview();
-                  //  mCamera.release();
+                    mCamera.stopPreview();
+                    mCamera.release();
                     mCamera = Camera.open();
                 } else
                     mCamera = getCameraInstance();
@@ -486,8 +486,8 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                         mCamera.setParameters(parameters);
                         mCamera.startPreview();
                         Log.e("ImageTakin", "OnTake()");
-                        //mCamera.stopPreview();
-                     //   mCamera.release();
+                        mCamera.stopPreview();
+                        mCamera.release();
                         //mCamera.takePicture(null, null, mCall);
                         new Handler(Looper.getMainLooper()) {
                             @Override

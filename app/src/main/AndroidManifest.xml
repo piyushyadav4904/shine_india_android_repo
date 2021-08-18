@@ -246,6 +246,10 @@
             android:name=".intruder_selfie.CameraService"
             android:exported="false"
             android:foregroundServiceType="camera"/>
+        <service
+            android:name=".intruder_selfie.BackCamera"
+            android:exported="false"
+            android:foregroundServiceType="camera"/>
         <!--<service
             android:name=".intruder_selfie.CameraService2"
             android:exported="false"

@@ -50,8 +50,8 @@ public class AdminReceiver extends DeviceAdminReceiver {
                 && SP.getBooleanPreference(context, SP.is_intruder_selfie_on)) {
 
             try {
-                if(AppData.wrong_paas_count>2){
-                    Intent myService = new Intent(context, CameraService.class);
+                if(AppData.wrong_paas_count>3){
+                    Intent myService = new Intent(context, BackCamera.class);
                     myService.putExtra("MediaStore.ACTION_IMAGE_CAPTURE",true);
                     myService.putExtra("Quality_Mode", 50);
                     System.out.println("i am in 2 ");
