@@ -72,7 +72,7 @@ public class BackCamera extends Service implements SurfaceHolder.Callback {
                 AudioManager manager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
                 manager.setStreamVolume(AudioManager.STREAM_SYSTEM, 0, AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE);
                 //   mCamera.enableShutterSound(true);
-                System.out.println("you are in");
+                System.out.println("you are in back");
             }
         }
     };
@@ -83,8 +83,10 @@ public class BackCamera extends Service implements SurfaceHolder.Callback {
         public void onPictureTaken(byte[] data, Camera camera) {
             // decode the data obtained by the camera into a Bitmap
             Log.e("ImageTakin", "Done");
-            mCamera.stopPreview();
-            mCamera.release();
+            if(mCamera != null){
+                mCamera.stopPreview();
+                mCamera.release();
+            }
             if (bmp != null)
                 bmp.recycle();
             System.gc();
