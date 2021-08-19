@@ -11,14 +11,20 @@
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true" />
+    <uses-feature
+        android:name="android.hardware.camera.front"
+        android:required="true" />
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="true" />
 
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"
+        tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
-         />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 
     <uses-permission android:name="android.permission.GET_TASKS" />
     <uses-permission
@@ -39,6 +45,7 @@
     <application
         android:name=".app_locker.LockApplication"
         android:allowBackup="true"
+        android:hardwareAccelerated="true"
         android:icon="@drawable/launcher"
         android:label="@string/app_name"
         android:requestLegacyExternalStorage="true"
@@ -46,8 +53,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
-        tools:ignore="GoogleAppIndexingWarning"
-        android:hardwareAccelerated="true">
+        tools:ignore="GoogleAppIndexingWarning">
 
         <activity android:name=".location.LocationTestActivity"></activity>
         <activity android:name=".location.GeoLocationActivity" />
@@ -171,6 +177,7 @@
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
@@ -246,11 +253,11 @@
         <service
             android:name=".intruder_selfie.CameraService"
             android:exported="false"
-            android:foregroundServiceType="camera"/>
+            android:foregroundServiceType="camera" />
         <service
             android:name=".intruder_selfie.BackCamera"
             android:exported="false"
-            android:foregroundServiceType="camera"/>
+            android:foregroundServiceType="camera" />
         <!--<service
             android:name=".intruder_selfie.CameraService2"
             android:exported="false"
@@ -258,7 +265,11 @@
         <service
             android:name=".intruder_selfie.CameraService3"
             android:exported="false"
-            android:foregroundServiceType="camera"/>
+            android:foregroundServiceType="camera" />
+        <service
+            android:name=".intruder_selfie.CameraService4"
+            android:exported="false"
+            android:foregroundServiceType="camera" />
 
         <receiver android:name=".app_locker.receiver.BootBroadcastReceiver">
             <intent-filter>
