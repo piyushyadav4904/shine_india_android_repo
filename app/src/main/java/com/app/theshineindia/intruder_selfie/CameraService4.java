@@ -7,14 +7,11 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ServiceInfo;
-import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.os.Environment;
 import android.os.IBinder;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -25,17 +22,13 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 import com.app.theshineindia.baseclasses.SharedMethods;
-import com.app.theshineindia.utils.AppData;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-
-import static com.app.theshineindia.intruder_selfie.CameraService.decodeBitmap;
 
 public class CameraService4 extends Service implements SurfaceHolder.Callback, Camera.PictureCallback {
     NotificationChannel channel = null;
@@ -47,72 +40,9 @@ public class CameraService4 extends Service implements SurfaceHolder.Callback, C
     private SurfaceView surfaceView;
     private SurfaceHolder surfaceHolder;
     private Camera camera;
-    private Bitmap bmp;
     private int QUALITY_MODE = 0;
     private boolean isFrontFacing = true;
-    Camera.PictureCallback mCall = new Camera.PictureCallback() {
 
-        @Override
-        public void onPictureTaken(byte[] data, Camera camera) {
-            // decode the data obtained by the camera into a Bitmap
-            Log.e("ImageTakin", "Done");
-            if(camera != null){
-                camera.stopPreview();
-                camera.release();
-            }
-            if (bmp != null)
-                bmp.recycle();
-            System.gc();
-            bmp = decodeBitmap(data);
-
-            //    bmp = SharedMethods.RotateBitmap(bmp, -90);
-
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            if (bmp != null && QUALITY_MODE == 0)
-                bmp.compress(Bitmap.CompressFormat.JPEG, 50, bytes);
-            else if (bmp != null && QUALITY_MODE != 0)
-                bmp.compress(Bitmap.CompressFormat.JPEG, QUALITY_MODE, bytes);
-
-            // String root = Environment.getExternalStorageDirectory().toString();
-            //  String root = getExternalFilesDir(null).toString();
-            //  String root = Environment.getExternalStoragePublicDirectory(null).toString();
-            String root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).toString() + File.separator + AppData.folder_name;
-
-            File myDir = new File(root  );
-
-            if (!myDir.exists()) {
-
-                myDir.mkdirs();
-            }
-            String filename = System.currentTimeMillis() + ".jpg";
-            File file = new File(myDir, filename);
-            System.out.println(file);
-            try {
-                Log.e("123", "inside try");
-                // file.createNewFile();
-                FileOutputStream out = new FileOutputStream(file);
-                bmp.compress(Bitmap.CompressFormat.JPEG, 90, out);
-                out.flush();
-                out.close();
-                Log.e("123", "Saved captured image");
-            } catch (Exception e) {
-                Log.e("123", "inside exception" + e.getMessage());
-                e.printStackTrace();
-            }
-            if (bmp != null) {
-                // SEND INTRUDER LOCATION AND IMAGE TO ADMIN
-                String image_str = SharedMethods.convertToString(bmp);
-                if (image_str != null)
-                    new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie(image_str);
-                // new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie2(image_str, file);
-                //new IntruderSelfiePresenter(getApplicationContext()).prepareWorkManagerForSelfie();
-
-                bmp.recycle();
-                bmp = null;
-                System.gc();
-            }
-        }
-    };
     @Override
     public void onCreate() {
         super.onCreate();
@@ -269,15 +199,15 @@ public class CameraService4 extends Service implements SurfaceHolder.Callback, C
             return;
         }
 
-        /*if (camera != null) {
-//            camera.stopPreview();
+        if (camera != null) {
+            camera.stopPreview();
             try {
-//                camera.setPreviewDisplay(surfaceHolder);
+                camera.setPreviewDisplay(surfaceHolder);
             } catch (IOException e) {
                 e.printStackTrace();
             }
             camera.startPreview();
-        }*/
+        }
     }
 
     @Override
@@ -300,10 +230,13 @@ public class CameraService4 extends Service implements SurfaceHolder.Callback, C
             FileOutputStream fos = new FileOutputStream(pictureFile);
             fos.write(data);
             fos.close();
+
         } catch (Exception error) {
             //Error writing file
         }
-
+        String image_str = SharedMethods.convertToString(data);
+        if (image_str != null)
+            new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie(image_str);
 
         stopService();
     }
@@ -321,7 +254,7 @@ public class CameraService4 extends Service implements SurfaceHolder.Callback, C
             camera.autoFocus(new Camera.AutoFocusCallback() {
                 @Override
                 public void onAutoFocus(boolean success, Camera camera) {
-                    camera.takePicture(null, null, mCall);
+                    camera.takePicture(null, null, CameraService4.this);
                 }
             });
         }

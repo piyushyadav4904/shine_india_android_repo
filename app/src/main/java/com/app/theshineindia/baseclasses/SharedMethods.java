@@ -197,6 +197,15 @@ public class SharedMethods {
         }
         return encImage;
     }
+    public static String convertToString(byte[] data) {
+        String encImage = "";
+        try {
+            encImage = Base64.encodeToString(data, Base64.DEFAULT);
+        } catch (Exception e) {
+            Log.d("1111", "encodeImage: " + e.getMessage());
+        }
+        return encImage;
+    }
 
 
     private static AlarmManager alarmManager;
