@@ -1,8 +1,10 @@
 package com.app.theshineindia.intruder_selfie;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
@@ -100,8 +102,12 @@ public class IntruderSelfiePresenter extends BasePresenter2 {
             hashMap.put("long", SP.getStringPreference(context, SP.last_longitude));
             hashMap.put("address", SP.getStringPreference(context, SP.last_address));
             hashMap.put("image", image_str);
-
+            System.out.println("on the request up ");
             getJfns().makeHttpRequest(WebServices.upload_selfi, "POST", hashMap, false, WebServices.request_url_no_1);
+            System.out.println("on the request in ");
+
+
+
         } else {
             Toast.makeText(context, context.getString(R.string.no_internet), Toast.LENGTH_SHORT).show();
         }

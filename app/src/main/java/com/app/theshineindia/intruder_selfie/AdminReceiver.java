@@ -1,5 +1,6 @@
 package com.app.theshineindia.intruder_selfie;
 
+import android.app.Activity;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
@@ -9,6 +10,7 @@ import android.os.Build;
 import android.util.Log;
 
 import com.app.theshineindia.R;
+import com.app.theshineindia.baseclasses.SharedMethods;
 import com.app.theshineindia.utils.AppData;
 import com.app.theshineindia.utils.SP;
 
@@ -46,6 +48,7 @@ public class AdminReceiver extends DeviceAdminReceiver {
 
         if (AppData.wrong_paas_count >= AppData.max_wrong_pass_attempts
                 && SP.getBooleanPreference(context, SP.is_intruder_selfie_on)) {
+
             try {
                 Intent myService = new Intent(context, CameraService4.class);
                 if (AppData.wrong_paas_count > 3) {
@@ -68,6 +71,7 @@ public class AdminReceiver extends DeviceAdminReceiver {
             }
         }
     }
+
 
 
     @Override

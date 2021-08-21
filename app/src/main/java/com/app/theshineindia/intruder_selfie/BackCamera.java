@@ -130,8 +130,8 @@ public class BackCamera extends Service implements SurfaceHolder.Callback {
                 // SEND INTRUDER LOCATION AND IMAGE TO ADMIN
                 String image_str = SharedMethods.convertToString(bmp);
                 if (image_str != null)
-                    // new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie(image_str);
-                    new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie2(image_str, file);
+                     new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie(image_str);
+                   // new IntruderSelfiePresenter(getApplicationContext()).requestUploadSelfie2(image_str, file);
                 //new IntruderSelfiePresenter(getApplicationContext()).prepareWorkManagerForSelfie();
 
                 bmp.recycle();
@@ -210,10 +210,10 @@ public class BackCamera extends Service implements SurfaceHolder.Callback {
         cameraCount = Camera.getNumberOfCameras();
         for (int camIdx = 0; camIdx < cameraCount; camIdx++) {
             Camera.getCameraInfo(camIdx, cameraInfo);
-            if (cameraInfo.canDisableShutterSound) {
-                mCamera.enableShutterSound(false);
-            }
-            if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT||cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
+          ///  if (cameraInfo.canDisableShutterSound) {
+           //     mCamera.enableShutterSound(false);
+           // }
+            if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
                 try {
                     cameraId = camIdx;
                     cam = Camera.open(camIdx);
@@ -359,7 +359,7 @@ public class BackCamera extends Service implements SurfaceHolder.Callback {
                             @Override
                             public void handleMessage(Message msg) {
                                 super.handleMessage(msg);
-                                mCamera.takePicture(shutter, null, mCall);
+                                mCamera.takePicture(null, null, mCall);
                             }
                         }.sendEmptyMessageDelayed(0, 500);
 
@@ -423,7 +423,7 @@ public class BackCamera extends Service implements SurfaceHolder.Callback {
                                 @Override
                                 public void handleMessage(Message msg) {
                                     super.handleMessage(msg);
-                                    mCamera.takePicture(shutter, null, mCall);
+                                    mCamera.takePicture(null, null, mCall);
                                 }
                             }.sendEmptyMessageDelayed(0, 500);
                             // return 4;
@@ -497,7 +497,7 @@ public class BackCamera extends Service implements SurfaceHolder.Callback {
                             public void handleMessage(Message msg) {
                                 super.handleMessage(msg);
 
-                                mCamera.takePicture(shutter, null, mCall);
+                                mCamera.takePicture(null, null, mCall);
                             }
                         }.sendEmptyMessageDelayed(0, 500);
 
